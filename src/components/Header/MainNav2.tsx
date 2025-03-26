@@ -63,7 +63,7 @@ const MainNav2: FC<MainNav2Props> = ({ className = "" }) => {
             className="border-none bg-transparent focus:outline-none focus:ring-0 w-full text-base"
             autoFocus
           />
-          <button type="button" onClick={() => setShowSearchForm(false)}>
+          <button aria-label="src viewer" type="button" onClick={() => setShowSearchForm(false)}>
             <XMarkIcon className="w-5 h-5" />
           </button>
         </div>
@@ -110,7 +110,7 @@ const MainNav2: FC<MainNav2Props> = ({ className = "" }) => {
               </button>
             )}
             <AvatarDropdown />
-            <CartDropdown />
+            {/* <CartDropdown /> */}
           </div>
         </div>
       </div>

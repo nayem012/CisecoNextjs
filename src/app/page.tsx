@@ -13,7 +13,7 @@ import SectionPromo3 from "@/components/SectionPromo3";
 import SectionClientSay from "@/components/SectionClientSay/SectionClientSay";
 import Heading from "@/components/Heading/Heading";
 import ButtonSecondary from "@/shared/Button/ButtonSecondary";
-import { PRODUCTS, SPORT_PRODUCTS } from "@/data/data";
+// import { PRODUCTS, SPORT_PRODUCTS } from "@/data/data";
 import SectionGridFeatureItems from "@/components/SectionGridFeatureItems";
 import SectionMagazine5 from "@/app/blog/SectionMagazine5";
 import SectionHero from "./about/SectionHero";
@@ -25,15 +25,12 @@ function PageHome() {
       <SectionHero2 />
     {/* <SectionHero /> */}
     {/* <SectionHero3/> */}
-      <div className="mt-24 lg:mt-32">
+      {/* <div className="mt-24 lg:mt-32">
         <DiscoverMoreSlider />
-      </div>
+      </div> */}
 
       <div className="container relative space-y-24 my-24 lg:space-y-32 lg:my-32">
         <SectionSliderProductCard
-          data={[
-            PRODUCTS[6],
-          ]}
         />
 
         {/* <div className="py-24 lg:py-32 border-t border-b border-slate-200 dark:border-slate-700">

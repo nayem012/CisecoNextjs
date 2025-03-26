@@ -189,8 +189,11 @@ const NavMobile: React.FC<NavMobileProps> = ({
         {data.map(_renderItem)}
       </ul>
       <div className="flex items-center justify-between py-6 px-5 space-x-2">
-        <ButtonPrimary href={"/"} className="!px-10">
-          Buy this template
+      <ButtonPrimary
+         href={"https://turag.netlify.app"}
+         targetBlank={true}
+          className="!px-10">
+          Contact Developer
         </ButtonPrimary>
       </div>
     </div>

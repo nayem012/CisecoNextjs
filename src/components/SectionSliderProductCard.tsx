@@ -5,8 +5,14 @@ import Heading from "@/components/Heading/Heading";
 // @ts-ignore
 import Glide from "@glidejs/glide/dist/glide.esm";
 import ProductCard from "./ProductCard";
-import { Product, PRODUCTS } from "@/data/data";
-
+import { Product } from "@/data/data";
+import {
+  useQuery,
+  useQueryClient,
+  useMutation,
+} from "@tanstack/react-query"
+import { getProducts } from "@/lib/api/product";
+import Image from "next/image";
 export interface SectionSliderProductCardProps {
   className?: string;
   itemClassName?: string;
@@ -14,7 +20,6 @@ export interface SectionSliderProductCardProps {
   headingFontClassName?: string;
   headingClassName?: string;
   subHeading?: string;
-  data?: Product[];
 }
 
 const SectionSliderProductCard: FC<SectionSliderProductCardProps> = ({
@@ -24,13 +29,20 @@ const SectionSliderProductCard: FC<SectionSliderProductCardProps> = ({
   headingClassName,
   heading,
   subHeading = "REY backpacks & bags",
-  data = PRODUCTS.filter((_, i) => i < 8 && i > 2),
 }) => {
   const sliderRef = useRef(null);
 
   //
   const [isShow, setIsShow] = useState(false);
-
+  // const queryClient = useQueryClient();
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["products"],
+    queryFn: async () => {
+      const response = await getProducts(10, 1);
+      return response.data;
+    },
+    select: (res) => res
+  });
   useEffect(() => {
     const OPTIONS: Partial<Glide.Options> = {
       // direction: document.querySelector("html")?.getAttribute("dir") || "ltr",
@@ -68,10 +80,22 @@ const SectionSliderProductCard: FC<SectionSliderProductCardProps> = ({
       slider.destroy();
     };
   }, [sliderRef]);
-
+  if (isLoading) return (<div>
+    {/* loading animation */}
+    <div className="flex flex-wrap justify-center">
+      <div className="w-16 h-16 bg-gray-200 dark:bg-gray-800 rounded-full animate-bounce m-2"></div>
+      <div className="w-16 h-16 bg-gray-200 dark:bg-gray-800 rounded-full animate-bounce m-2"></div>
+      <div className="w-16 h-16 bg-gray-200 dark:bg-gray-800 rounded-full animate-bounce m-2"></div>
+      <div className="w-16 h-16 bg-gray-200 dark:bg-gray-800 rounded-full animate-bounce m-2"></div>
+    </div>
+  </div>);
+  if (isError) {
+    // console.log("Error", isError);
+    return <div>Error...</div>
+  };
   return (
     <div className={`nc-SectionSliderProductCard ${className}`}>
-      <div ref={sliderRef} className={`flow-root ${isShow ? "" : "invisible"}`}>
+      <div ref={sliderRef} className={`flow-root ${isShow ? "" : ""}`}>
         <Heading
           className={headingClassName}
           fontClass={headingFontClassName}
@@ -82,15 +106,29 @@ const SectionSliderProductCard: FC<SectionSliderProductCardProps> = ({
         </Heading>
         <div className="glide__track" data-glide-el="track">
           <ul className="glide__slides">
-            {data.map((item, index) => (
-              <li key={index} className={`glide__slide ${itemClassName}`}>
-                <ProductCard data={item} />
+            {data && data.map((item: Product , index: number) => (
+              <li key={index} className={`glide__slide  ${itemClassName}`}>
+                <ProductCard data={item} className="h-96 w-96" />
+                {/* <p className="text-rose-950">{item.name}</p> */}
               </li>
             ))}
           </ul>
         </div>
       </div>
     </div>
+    // <div>
+    //   {data && data.map((item: Product, index: number) => (
+    //     <div key={index}>
+    //       <p className="text-rose-950">{item.name}</p>
+    //       <Image
+    //         src={item.images[0]}
+    //         alt={item.name}
+    //         width={200}
+    //         height={200}
+    //       />
+    //     </div>
+    //   ))}
+    // </div>
   );
 };
 

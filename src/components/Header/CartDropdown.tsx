@@ -2,7 +2,7 @@
 
 import { Popover, Transition } from "@/app/headlessui";
 import Prices from "@/components/Prices";
-import { Product, PRODUCTS } from "@/data/data";
+import { Product } from "@/data/data";
 import { Fragment } from "react";
 import ButtonPrimary from "@/shared/Button/ButtonPrimary";
 import ButtonSecondary from "@/shared/Button/ButtonSecondary";
@@ -10,58 +10,58 @@ import Image from "next/image";
 import Link from "next/link";
 
 export default function CartDropdown() {
-  const renderProduct = (item: Product, index: number, close: () => void) => {
-    const { name, price, image } = item;
-    return (
-      <div key={index} className="flex py-5 last:pb-0">
-        <div className="relative h-24 w-20 flex-shrink-0 overflow-hidden rounded-xl bg-slate-100">
-          <Image
-            fill
-            src={image}
-            alt={name}
-            className="h-full w-full object-contain object-center"
-          />
-          <Link
-            onClick={close}
-            className="absolute inset-0"
-            href={"/product-detail"}
-          />
-        </div>
+  // const renderProduct = (item: Product, index: number, close: () => void) => {
+  //   const { name, price, image } = item;
+  //   return (
+  //     <div key={index} className="flex py-5 last:pb-0">
+  //       <div className="relative h-24 w-20 flex-shrink-0 overflow-hidden rounded-xl bg-slate-100">
+  //         <Image
+  //           fill
+  //           src={image}
+  //           alt={name}
+  //           className="h-full w-full object-contain object-center"
+  //         />
+  //         <Link
+  //           onClick={close}
+  //           className="absolute inset-0"
+  //           href={"/product-detail"}
+  //         />
+  //       </div>
 
-        <div className="ml-4 flex flex-1 flex-col">
-          <div>
-            <div className="flex justify-between ">
-              <div>
-                <h3 className="text-base font-medium ">
-                  <Link onClick={close} href={"/product-detail"}>
-                    {name}
-                  </Link>
-                </h3>
-                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                  <span>{`Natural`}</span>
-                  <span className="mx-2 border-l border-slate-200 dark:border-slate-700 h-4"></span>
-                  <span>{"XL"}</span>
-                </p>
-              </div>
-              <Prices price={price} className="mt-0.5" />
-            </div>
-          </div>
-          <div className="flex flex-1 items-end justify-between text-sm">
-            <p className="text-gray-500 dark:text-slate-400">{`Qty 1`}</p>
+  //       <div className="ml-4 flex flex-1 flex-col">
+  //         <div>
+  //           <div className="flex justify-between ">
+  //             <div>
+  //               <h3 className="text-base font-medium ">
+  //                 <Link onClick={close} href={"/product-detail"}>
+  //                   {name}
+  //                 </Link>
+  //               </h3>
+  //               <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+  //                 <span>{`Natural`}</span>
+  //                 <span className="mx-2 border-l border-slate-200 dark:border-slate-700 h-4"></span>
+  //                 <span>{"XL"}</span>
+  //               </p>
+  //             </div>
+  //             <Prices price={price} className="mt-0.5" />
+  //           </div>
+  //         </div>
+  //         <div className="flex flex-1 items-end justify-between text-sm">
+  //           <p className="text-gray-500 dark:text-slate-400">{`Qty 1`}</p>
 
-            <div className="flex">
-              <button
-                type="button"
-                className="font-medium text-primary-6000 dark:text-primary-500 "
-              >
-                Remove
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
+  //           <div className="flex">
+  //             <button
+  //               type="button"
+  //               className="font-medium text-primary-6000 dark:text-primary-500 "
+  //             >
+  //               Remove
+  //             </button>
+  //           </div>
+  //         </div>
+  //       </div>
+  //     </div>
+  //   );
+  // };
 
   return (
     <Popover className="relative">
@@ -132,9 +132,10 @@ export default function CartDropdown() {
                   <div className="max-h-[60vh] p-5 overflow-y-auto hiddenScrollbar">
                     <h3 className="text-xl font-semibold">Shopping cart</h3>
                     <div className="divide-y divide-slate-100 dark:divide-slate-700">
-                      {[PRODUCTS[0], PRODUCTS[1], PRODUCTS[2]].map(
-                        (item, index) => renderProduct(item, index, close)
-                      )}
+                      {/* {[PRODUCTS[0], PRODUCTS[1], PRODUCTS[2]].map(
+                        (item, index) =>
+                          renderProduct(item, index, close)
+                      )} */}
                     </div>
                   </div>
                   <div className="bg-neutral-50 dark:bg-slate-900 p-5">

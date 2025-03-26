@@ -4,19 +4,19 @@ import React, { FC, useState } from "react";
 import LikeButton from "./LikeButton";
 import Prices from "./Prices";
 import { ArrowsPointingOutIcon } from "@heroicons/react/24/outline";
-import { Product, PRODUCTS } from "@/data/data";
+import { Product, ProductStatus } from "@/data/data";
 import { StarIcon } from "@heroicons/react/24/solid";
 import ButtonPrimary from "@/shared/Button/ButtonPrimary";
 import ButtonSecondary from "@/shared/Button/ButtonSecondary";
-import BagIcon from "./BagIcon";
-import toast from "react-hot-toast";
 import { Transition } from "@/app/headlessui";
 import ModalQuickView from "./ModalQuickView";
-import ProductStatus from "./ProductStatus";
+import ProductStatusIndicator from "./ProductStatus";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import NcImage from "@/shared/NcImage/NcImage";
+import toast from "react-hot-toast";
+import { UrlObject } from "url";
 
 export interface ProductCardProps {
   className?: string;
@@ -26,28 +26,32 @@ export interface ProductCardProps {
 
 const ProductCard: FC<ProductCardProps> = ({
   className = "",
-  data = PRODUCTS[0],
+  data,
   isLiked,
 }) => {
   const {
+    _id,
     name,
     price,
+    discountedPrice,
     description,
-    sizes,
-    variants,
-    variantType,
+    category,
+    images,
+    sizeInventory,
     status,
-    image,
     rating,
-    id,
-    numberOfReviews,
-  } = data;
-
-  const [variantActive, setVariantActive] = useState(0);
+  } = data || {};
+  
   const [showModalQuickView, setShowModalQuickView] = useState(false);
+  const [selectedSize, setSelectedSize] = useState<string>();
   const router = useRouter();
 
   const notifyAddTocart = ({ size }: { size?: string }) => {
+    if (!size) {
+      toast.error("Please select a size first");
+      return;
+    }
+
     toast.custom(
       (t) => (
         <Transition
@@ -70,48 +74,49 @@ const ProductCard: FC<ProductCardProps> = ({
       ),
       {
         position: "top-right",
-        id: String(id) || "product-detail",
+        id: _id || "product-detail",
         duration: 3000,
       }
     );
   };
 
   const renderProductCartOnNotify = ({ size }: { size?: string }) => {
+    if (!data) return null;
+
     return (
-      <div className="flex ">
-        <div className="h-24 w-20 flex-shrink-0 overflow-hidden rounded-xl bg-slate-100">
-          <Image
-            width={80}
-            height={96}
-            src={image}
-            alt={name}
-            className="absolute object-cover object-center"
-          />
+      <div className="flex">
+        <div className="h-24 w-20 flex-shrink-0 overflow-hidden rounded-xl bg-slate-100 relative">
+          {images?.[0] && (
+            <Image
+              fill
+              src={images[0]}
+              alt={name || "Product image"}
+              className="object-cover object-center"
+              sizes="100px"
+            />
+          )}
         </div>
 
         <div className="ms-4 flex flex-1 flex-col">
           <div>
-            <div className="flex justify-between ">
+            <div className="flex justify-between">
               <div>
-                <h3 className="text-base font-medium ">{name}</h3>
+                <h3 className="text-base font-medium">{name}</h3>
                 <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                  <span>
-                    {variants ? variants[variantActive].name : `Natural`}
-                  </span>
-                  <span className="mx-2 border-s border-slate-200 dark:border-slate-700 h-4"></span>
-                  <span>{size || "XL"}</span>
+                  <span>{category}</span>
+                  <span className="mx-2 border-s border-slate-200 dark:border-slate-700 h-4" />
+                  <span>{size || "Size Not Selected"}</span>
                 </p>
               </div>
-              <Prices price={price} className="mt-0.5" />
+              <Prices price={price} discountedPrice={discountedPrice} className="mt-0.5" />
             </div>
           </div>
           <div className="flex flex-1 items-end justify-between text-sm">
             <p className="text-gray-500 dark:text-slate-400">Qty 1</p>
-
             <div className="flex">
               <button
                 type="button"
-                className="font-medium text-primary-6000 dark:text-primary-500 "
+                className="font-medium text-primary-6000 dark:text-primary-500"
                 onClick={(e) => {
                   e.preventDefault();
                   router.push("/cart");
@@ -126,189 +131,113 @@ const ProductCard: FC<ProductCardProps> = ({
     );
   };
 
-  const getBorderClass = (Bgclass = "") => {
-    if (Bgclass.includes("red")) {
-      return "border-red-500";
-    }
-    if (Bgclass.includes("violet")) {
-      return "border-violet-500";
-    }
-    if (Bgclass.includes("orange")) {
-      return "border-orange-500";
-    }
-    if (Bgclass.includes("green")) {
-      return "border-green-500";
-    }
-    if (Bgclass.includes("blue")) {
-      return "border-blue-500";
-    }
-    if (Bgclass.includes("sky")) {
-      return "border-sky-500";
-    }
-    if (Bgclass.includes("yellow")) {
-      return "border-yellow-500";
-    }
-    return "border-transparent";
-  };
-
-  const renderVariants = () => {
-    if (!variants || !variants.length || !variantType) {
-      return null;
-    }
-
-    if (variantType === "color") {
-      // return (
-      //   <div className="flex space-x-1">
-      //     {variants.map((variant, index) => (
-      //       <div
-      //         key={index}
-      //         onClick={() => setVariantActive(index)}
-      //         className={`relative w-6 h-6 rounded-full overflow-hidden z-10 border cursor-pointer ${
-      //           variantActive === index
-      //             ? getBorderClass(variant.color)
-      //             : "border-transparent"
-      //         }`}
-      //         title={variant.name}
-      //       >
-      //         <div
-      //           // className={`absolute inset-0.5 rounded-full z-0 ${variant.color}`}
-      //         ></div>
-      //       </div>
-      //     ))}
-      //   </div>
-      // );
-    }
+  const renderSizeList = () => {
+    if (!sizeInventory?.length) return null;
 
     return (
-      <div className="flex ">
-        {variants.map((variant, index) => (
-          <div
-            key={index}
-            onClick={() => setVariantActive(index)}
-            className={`relative w-11 h-6 rounded-full overflow-hidden z-10 border cursor-pointer ${
-              variantActive === index
-                ? "border-black dark:border-slate-300"
-                : "border-transparent"
-            }`}
-            title={variant.name}
+      <div className="absolute bottom-3 inset-x-3 grid grid-cols-4 gap-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
+        {sizeInventory.map(({ size, stock }) => (
+          <button
+            key={size}
+            type="button"
+            disabled={stock <= 0}
+            className={`w-full h-10 rounded-xl flex items-center justify-center uppercase font-semibold text-sm transition-colors
+              ${selectedSize === size 
+                ? "bg-primary-6000 text-white border-2 border-primary-6000" 
+                : "bg-white hover:bg-gray-100 text-slate-900 border-2 border-slate-200"}
+              ${stock <= 0 ? "bg-gray-100 text-gray-400 cursor-not-allowed" : ""}`}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setSelectedSize(size);
+            }}
+            title={stock <= 0 ? "Out of stock" : `Select size ${size}`}
           >
-            <div
-              className="absolute inset-0.5 rounded-full overflow-hidden z-0 bg-cover"
-              style={{
-                backgroundImage: `url(${
-                  // @ts-ignore
-                  typeof variant.thumbnail?.src === "string"
-                    ? // @ts-ignore
-                      variant.thumbnail?.src
-                    : typeof variant.thumbnail === "string"
-                    ? variant.thumbnail
-                    : ""
-                })`,
-              }}
-            ></div>
-          </div>
+            {size}
+          </button>
         ))}
       </div>
     );
   };
 
-  const renderGroupButtons = () => {
-    return (
-      <div className="absolute bottom-0 group-hover:bottom-4 inset-x-1 flex justify-center opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
-        {/* <ButtonPrimary
-          className="shadow-lg"
-          fontSize="text-xs"
-          sizeClass="py-2 px-4"
-          onClick={() => notifyAddTocart({ size: "XL" })}
-        >
-          <BagIcon className="w-3.5 h-3.5 mb-0.5" />
-          <span className="ms-1">Add to bag</span>
-        </ButtonPrimary> */}
-        <ButtonSecondary
-          className="ms-1.5 bg-white hover:!bg-gray-100 hover:text-slate-900 transition-colors shadow-lg"
-          fontSize="text-xs"
-          sizeClass="py-2 px-4"
-          onClick={() => setShowModalQuickView(true)}
-        >
-          <ArrowsPointingOutIcon className="w-3.5 h-3.5" />
-          <span className="ms-1">Quick view</span>
-        </ButtonSecondary>
-      </div>
-    );
-  };
+  if (!data) return null;
 
-  const renderSizeList = () => {
-    if (!sizes || !sizes.length) {
-      return null;
-    }
+  const renderGroupButtons = () => (
+    <div className="absolute top-3 start-3 flex flex-col gap-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
+      <ButtonSecondary
+        className="!p-2.5 bg-white hover:bg-slate-100"
+        onClick={() => {
+          setShowModalQuickView(true);
+        }}
+      >
+        <ArrowsPointingOutIcon className="w-5 h-5" />
+      </ButtonSecondary>
+      <ButtonPrimary
+        className="!p-2.5"
+        onClick={() => {
+          notifyAddTocart({ size: selectedSize });
+        }}
+      >
+        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M4 4h2v6h9l-2 8h10l-3-9h-10.5l-.5-2h-10zm16 14h-10l1.5-6h10l-1.5 6z"/>
+        </svg>
+      </ButtonPrimary>
+    </div>
+  );
 
-    return (
-      <div className="absolute bottom-0 inset-x-1 space-x-1.5 rtl:space-x-reverse flex justify-center opacity-0 invisible group-hover:bottom-4 group-hover:opacity-100 group-hover:visible transition-all">
-        {sizes.map((size, index) => {
-          return (
-            <div
-              key={index}
-              className="nc-shadow-lg w-10 h-10 rounded-xl bg-white hover:bg-slate-900 hover:text-white transition-colors cursor-pointer flex items-center justify-center uppercase font-semibold tracking-tight text-sm text-slate-900"
-              onClick={() => notifyAddTocart({ size })}
-            >
-              {size}
-            </div>
-          );
-        })}
-      </div>
-    );
+  const prodUrl: UrlObject = {
+    pathname: `/product-detail/${_id}`,
   };
 
   return (
     <>
-      <div
-        className={`nc-ProductCard relative flex flex-col bg-transparent ${className}`}
-      >
-        <Link href={"/product-detail"} className="absolute inset-0"></Link>
+      <div className={`nc-ProductCard relative flex flex-col bg-transparent group ${className}`}>
+        <Link href={prodUrl} className="absolute inset-0 z-0" />
 
-        <div className="relative flex-shrink-0 bg-slate-50 dark:bg-slate-300 rounded-3xl overflow-hidden z-1 group">
-          <Link href={"/product-detail"} className="block">
-            <NcImage
-              containerClassName="flex aspect-w-11 aspect-h-12 w-full h-0"
-              src={image}
-              className="object-cover w-full h-full drop-shadow-xl"
-              fill
-              sizes="(max-width: 640px) 100vw, (max-width: 1200px) 50vw, 40vw"
-              alt="product"
-            />
-          </Link>
-          <ProductStatus status={status} />
+        <div className="relative flex-shrink-0 bg-slate-50 dark:bg-slate-300 rounded-3xl overflow-hidden z-1 h-80">
+          <NcImage
+            containerClassName="w-full h-full"
+            src={images?.[0] || "/images/placeholder.png"}
+            className="object-cover w-full h-full drop-shadow-xl"
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1200px) 50vw, 40vw"
+            alt={name}
+          />
+          
+          <ProductStatusIndicator status={status || "New in"} />
           <LikeButton liked={isLiked} className="absolute top-3 end-3 z-10" />
           {renderGroupButtons()}
+          {renderSizeList()}
         </div>
 
         <div className="space-y-4 px-2.5 pt-5 pb-2.5">
-          {renderVariants()}
           <div>
             <h2 className="nc-ProductCard__title text-base font-semibold transition-colors">
               {name}
             </h2>
-            <p className={`text-sm text-slate-500 dark:text-slate-400 mt-1 `}>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
               {description}
             </p>
           </div>
 
-          <div className="flex justify-between items-end ">
-            <Prices price={price} />
-            <div className="flex items-center mb-0.5">
-              <StarIcon className="w-5 h-5 pb-[1px] text-amber-400" />
-              <span className="text-sm ms-1 text-slate-500 dark:text-slate-400">
-                {rating || ""} ({numberOfReviews || 0} reviews)
-              </span>
-            </div>
+          <div className="flex justify-between items-end">
+            <Prices price={price} discountedPrice={discountedPrice} />
+            {rating && (
+              <div className="flex items-center mb-0.5">
+                <StarIcon className="w-5 h-5 pb-[1px] text-amber-400" />
+                <span className="text-sm ms-1 text-slate-500 dark:text-slate-400">
+                  {rating.average.toFixed(1)} ({rating.count} reviews)
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      {/* QUICKVIEW */}
       <ModalQuickView
         show={showModalQuickView}
         onCloseModalQuickView={() => setShowModalQuickView(false)}
+        data={data}
       />
     </>
   );

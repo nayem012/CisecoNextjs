@@ -1,7 +1,7 @@
 import React, { FC } from "react";
 import { Transition } from "@/app/headlessui";
 import Prices from "@/components/Prices";
-import { PRODUCTS } from "@/data/data";
+import { Product } from "@/data/data";
 import Image, { StaticImageData } from "next/image";
 
 interface Props {
@@ -20,7 +20,11 @@ const NotifyAddTocart: FC<Props> = ({
   sizeSelected,
 }) => {
   const { name, price, variants } = PRODUCTS[0];
-
+  const getCartProducts = async () => {
+    // const res = await fetch("/api/cart");
+    // return await res.json();
+    throw new Error("Not implemented");
+  };
   const renderProductCartOnNotify = () => {
     return (
       <div className="flex ">

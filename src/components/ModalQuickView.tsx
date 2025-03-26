@@ -6,15 +6,18 @@ import ButtonClose from "@/shared/ButtonClose/ButtonClose";
 import ProductQuickView from "./ProductQuickView";
 import ProductQuickView2 from "./ProductQuickView2";
 import { usePathname } from "next/navigation";
+import { Product } from "@/data/data";
 
 export interface ModalQuickViewProps {
   show: boolean;
   onCloseModalQuickView: () => void;
+  data: Product;
 }
 
 const ModalQuickView: FC<ModalQuickViewProps> = ({
   show,
   onCloseModalQuickView,
+  data,
 }) => {
   const pathname = usePathname();
 
@@ -64,7 +67,7 @@ const ModalQuickView: FC<ModalQuickViewProps> = ({
                   {pathname.includes("/home-2") ? (
                     <ProductQuickView2 />
                   ) : (
-                    <ProductQuickView />
+                    <ProductQuickView product={data} />
                   )}
                 </div>
               </div>
