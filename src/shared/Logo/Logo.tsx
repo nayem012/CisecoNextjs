@@ -1,5 +1,5 @@
 import React from "react";
-import logoImg from "@/images/logo.svg";
+import logoImg from "@/images/logo.png";
 import logoLightImg from "@/images/logo-light.svg";
 import Link from "next/link";
 import Image from "next/image";
@@ -23,15 +23,19 @@ const Logo: React.FC<LogoProps> = ({
       {/* THIS USE FOR MY CLIENT */}
       {/* PLEASE UN COMMENT BELLOW CODE AND USE IT */}
       {img ? (
-        <Image
-          className={`block h-8 sm:h-10 w-auto ${
-            imgLight ? "dark:hidden" : ""
-          }`}
-          src={img}
-          alt="Logo"
-          sizes="200px"
-          priority
-        />
+        <div className="flex items-center space-x-2">
+          <Image
+            className={`block h-8 sm:h-10 w-auto ${
+              imgLight ? "dark:hidden" : ""
+            }`}
+            src={img}
+            alt="Logo"
+            sizes="200px"
+            priority
+          />
+          {/* text artexo */}
+          <h1 className="text-2xl font-bold text-gray-800">Artexo</h1>
+        </div>
       ) : (
         "Logo Here"
       )}

@@ -11,27 +11,27 @@ interface Hero2DataType {
   btnText: string;
   btnLink: Route;
 }
-
 export const HERO2_DEMO_DATA: Hero2DataType[] = [
   {
     image: imageRightPng2,
-    heading: "Exclusive collection for everyone",
-    subHeading: "In this season, find the best 🔥",
-    btnText: "Explore now",
+    heading: "Artexo",
+    subHeading: "Discover exclusive designs crafted with passion ❤️",
+    btnText: "Shop Now 🛒",
     btnLink: "/",
   },
   {
     image: imageRightPng3,
-    heading: "Exclusive collection for everyone",
-    subHeading: "In this season, find the best 🔥",
-    btnText: "Explore now",
+    heading: "Artexo",
+    subHeading: "Stand out with unique styles from the heart of fashion 🔥",
+    btnText: "Explore Collection 🔍",
     btnLink: "/",
   },
   {
     image: imageRightPng,
-    heading: "Exclusive collection for everyone",
-    subHeading: "In this season, find the best 🔥",
-    btnText: "Explore now",
+    heading: "Artexo",
+    subHeading: "Elevate your wardrobe with our latest trends 😍",
+    btnText: "Get Yours Today 🎉",
     btnLink: "/",
   },
 ];
+

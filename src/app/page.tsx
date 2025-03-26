@@ -16,15 +16,18 @@ import ButtonSecondary from "@/shared/Button/ButtonSecondary";
 import { PRODUCTS, SPORT_PRODUCTS } from "@/data/data";
 import SectionGridFeatureItems from "@/components/SectionGridFeatureItems";
 import SectionMagazine5 from "@/app/blog/SectionMagazine5";
+import SectionHero from "./about/SectionHero";
+import SectionHero3 from "@/components/SectionHero/SectionHero3";
 
 function PageHome() {
   return (
     <div className="nc-PageHome relative overflow-hidden">
       <SectionHero2 />
-
-      {/* <div className="mt-24 lg:mt-32">
+    {/* <SectionHero /> */}
+    {/* <SectionHero3/> */}
+      <div className="mt-24 lg:mt-32">
         <DiscoverMoreSlider />
-      </div> */}
+      </div>
 
       <div className="container relative space-y-24 my-24 lg:space-y-32 lg:my-32">
         <SectionSliderProductCard
