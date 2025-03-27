@@ -8,14 +8,16 @@ import { Product, ProductStatus } from "@/data/data";
 import { StarIcon } from "@heroicons/react/24/solid";
 import ButtonPrimary from "@/shared/Button/ButtonPrimary";
 import ButtonSecondary from "@/shared/Button/ButtonSecondary";
+import BagIcon from "./BagIcon";
+import toast from "react-hot-toast";
 import { Transition } from "@/app/headlessui";
 import ModalQuickView from "./ModalQuickView";
-import ProductStatusIndicator from "./ProductStatus";
+// import ProductStatus from "./ProductStatus";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import NcImage from "@/shared/NcImage/NcImage";
-import toast from "react-hot-toast";
+import ProductStatusIndicator from "./ProductStatus";
 import { UrlObject } from "url";
 
 export interface ProductCardProps {
@@ -29,29 +31,39 @@ const ProductCard: FC<ProductCardProps> = ({
   data,
   isLiked,
 }) => {
+  const defaultProduct: Product = {
+    _id: "",
+    name: "",
+    description: "",
+    price: 0,
+    category: "",
+    images: [],
+    sku: "",
+    sizeInventory: [],
+    lowStockThreshold: 0,
+    status: "New in",
+    metaTitle: "",
+    metaDescription: "",
+    productTags: [],
+  };
+
   const {
     _id,
     name,
     price,
     discountedPrice,
     description,
-    category,
-    images,
     sizeInventory,
     status,
+    images,
     rating,
-  } = data || {};
-  
+  } = data || defaultProduct;
+
+  const [variantActive, setVariantActive] = useState(0);
   const [showModalQuickView, setShowModalQuickView] = useState(false);
-  const [selectedSize, setSelectedSize] = useState<string>();
   const router = useRouter();
 
   const notifyAddTocart = ({ size }: { size?: string }) => {
-    if (!size) {
-      toast.error("Please select a size first");
-      return;
-    }
-
     toast.custom(
       (t) => (
         <Transition
@@ -81,31 +93,27 @@ const ProductCard: FC<ProductCardProps> = ({
   };
 
   const renderProductCartOnNotify = ({ size }: { size?: string }) => {
-    if (!data) return null;
-
     return (
-      <div className="flex">
-        <div className="h-24 w-20 flex-shrink-0 overflow-hidden rounded-xl bg-slate-100 relative">
-          {images?.[0] && (
+      <div className="flex ">
+        <div className="h-24 w-20 flex-shrink-0 overflow-hidden rounded-xl bg-slate-100">
+          {images?.length > 0 && (
             <Image
-              fill
+              width={80}
+              height={96}
               src={images[0]}
-              alt={name || "Product image"}
-              className="object-cover object-center"
-              sizes="100px"
+              alt={name}
+              className="absolute object-cover object-center"
             />
           )}
         </div>
 
         <div className="ms-4 flex flex-1 flex-col">
           <div>
-            <div className="flex justify-between">
+            <div className="flex justify-between ">
               <div>
-                <h3 className="text-base font-medium">{name}</h3>
+                <h3 className="text-base font-medium ">{name}</h3>
                 <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                  <span>{category}</span>
-                  <span className="mx-2 border-s border-slate-200 dark:border-slate-700 h-4" />
-                  <span>{size || "Size Not Selected"}</span>
+                  <span>{size || "XL"}</span>
                 </p>
               </div>
               <Prices price={price} discountedPrice={discountedPrice} className="mt-0.5" />
@@ -116,7 +124,7 @@ const ProductCard: FC<ProductCardProps> = ({
             <div className="flex">
               <button
                 type="button"
-                className="font-medium text-primary-6000 dark:text-primary-500"
+                className="font-medium text-primary-6000 dark:text-primary-500 "
                 onClick={(e) => {
                   e.preventDefault();
                   router.push("/cart");
@@ -131,83 +139,67 @@ const ProductCard: FC<ProductCardProps> = ({
     );
   };
 
-  const renderSizeList = () => {
-    if (!sizeInventory?.length) return null;
-
+  const renderGroupButtons = () => {
     return (
-      <div className="absolute bottom-3 inset-x-3 grid grid-cols-4 gap-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
-        {sizeInventory.map(({ size, stock }) => (
-          <button
-            key={size}
-            type="button"
-            disabled={stock <= 0}
-            className={`w-full h-10 rounded-xl flex items-center justify-center uppercase font-semibold text-sm transition-colors
-              ${selectedSize === size 
-                ? "bg-primary-6000 text-white border-2 border-primary-6000" 
-                : "bg-white hover:bg-gray-100 text-slate-900 border-2 border-slate-200"}
-              ${stock <= 0 ? "bg-gray-100 text-gray-400 cursor-not-allowed" : ""}`}
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              setSelectedSize(size);
-            }}
-            title={stock <= 0 ? "Out of stock" : `Select size ${size}`}
-          >
-            {size}
-          </button>
-        ))}
+      <div className="absolute bottom-0 group-hover:bottom-4 inset-x-1 flex justify-center opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
+        <ButtonSecondary
+          className="ms-1.5 bg-white hover:!bg-gray-100 hover:text-slate-900 transition-colors shadow-lg"
+          fontSize="text-xs"
+          sizeClass="py-2 px-4"
+          onClick={() => setShowModalQuickView(true)}
+        >
+          <ArrowsPointingOutIcon className="w-3.5 h-3.5" />
+          <span className="ms-1">Quick view</span>
+        </ButtonSecondary>
       </div>
     );
   };
 
-  if (!data) return null;
+  const renderSizeList = () => {
+    if (!sizeInventory || sizeInventory.length === 0) {
+      return null;
+    }
 
-  const renderGroupButtons = () => (
-    <div className="absolute top-3 start-3 flex flex-col gap-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
-      <ButtonSecondary
-        className="!p-2.5 bg-white hover:bg-slate-100"
-        onClick={() => {
-          setShowModalQuickView(true);
-        }}
-      >
-        <ArrowsPointingOutIcon className="w-5 h-5" />
-      </ButtonSecondary>
-      <ButtonPrimary
-        className="!p-2.5"
-        onClick={() => {
-          notifyAddTocart({ size: selectedSize });
-        }}
-      >
-        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M4 4h2v6h9l-2 8h10l-3-9h-10.5l-.5-2h-10zm16 14h-10l1.5-6h10l-1.5 6z"/>
-        </svg>
-      </ButtonPrimary>
-    </div>
-  );
-
-  const prodUrl: UrlObject = {
-    pathname: `/product-detail/${_id}`,
+    return (
+      <div className="absolute bottom-0 inset-x-1 space-x-1.5 rtl:space-x-reverse flex justify-center opacity-0 invisible group-hover:bottom-4 group-hover:opacity-100 group-hover:visible transition-all">
+        {sizeInventory.map((sizeItem, index) => (
+          <div
+            key={index}
+            className="nc-shadow-lg w-10 h-10 rounded-xl bg-white hover:bg-slate-900 hover:text-white transition-colors cursor-pointer flex items-center justify-center uppercase font-semibold tracking-tight text-sm text-slate-900"
+            onClick={() => notifyAddTocart({ size: sizeItem.size })}
+          >
+            {sizeItem.size}
+          </div>
+        ))}
+      </div>
+    );
   };
-
+const prodLink: UrlObject  = {
+  pathname: `/product-detail/${_id}`,
+}
   return (
     <>
-      <div className={`nc-ProductCard relative flex flex-col bg-transparent group ${className}`}>
-        <Link href={prodUrl} className="absolute inset-0 z-0" />
+      <div
+        className={`nc-ProductCard relative flex flex-col bg-transparent ${className}`}
+      >
+        <Link href={prodLink} className="absolute inset-0"></Link>
 
-        <div className="relative flex-shrink-0 bg-slate-50 dark:bg-slate-300 rounded-3xl overflow-hidden z-1 h-80">
-          <NcImage
-            containerClassName="w-full h-full"
-            src={images?.[0] || "/images/placeholder.png"}
-            className="object-cover w-full h-full drop-shadow-xl"
-            fill
-            sizes="(max-width: 640px) 100vw, (max-width: 1200px) 50vw, 40vw"
-            alt={name}
-          />
-          
-          <ProductStatusIndicator status={status || "New in"} />
+        <div className="relative flex-shrink-0 bg-slate-50 dark:bg-slate-300 rounded-3xl overflow-hidden z-1 group">
+          <Link href={prodLink} className="block">
+            {images?.length > 0 && (
+              <NcImage
+                containerClassName="flex aspect-w-11 aspect-h-12 w-full h-0"
+                src={images[0]}
+                className="object-cover w-full h-full drop-shadow-xl"
+                fill
+                sizes="(max-width: 640px) 100vw, (max-width: 1200px) 50vw, 40vw"
+                alt="product"
+              />
+            )}
+          </Link>
+          <ProductStatusIndicator status={status as ProductStatus} />
           <LikeButton liked={isLiked} className="absolute top-3 end-3 z-10" />
           {renderGroupButtons()}
-          {renderSizeList()}
         </div>
 
         <div className="space-y-4 px-2.5 pt-5 pb-2.5">
@@ -215,12 +207,12 @@ const ProductCard: FC<ProductCardProps> = ({
             <h2 className="nc-ProductCard__title text-base font-semibold transition-colors">
               {name}
             </h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
+            <p className={`text-sm text-slate-500 dark:text-slate-400 mt-1 `}>
               {description}
             </p>
           </div>
 
-          <div className="flex justify-between items-end">
+          <div className="flex justify-between items-end ">
             <Prices price={price} discountedPrice={discountedPrice} />
             {rating && (
               <div className="flex items-center mb-0.5">
@@ -237,7 +229,7 @@ const ProductCard: FC<ProductCardProps> = ({
       <ModalQuickView
         show={showModalQuickView}
         onCloseModalQuickView={() => setShowModalQuickView(false)}
-        data={data}
+        data={data as Product}
       />
     </>
   );

@@ -6,13 +6,9 @@ import Heading from "@/components/Heading/Heading";
 import Glide from "@glidejs/glide/dist/glide.esm";
 import ProductCard from "./ProductCard";
 import { Product } from "@/data/data";
-import {
-  useQuery,
-  useQueryClient,
-  useMutation,
-} from "@tanstack/react-query"
+import { useQuery } from "@tanstack/react-query";
 import { getProducts } from "@/lib/api/product";
-import Image from "next/image";
+
 export interface SectionSliderProductCardProps {
   className?: string;
   itemClassName?: string;
@@ -20,6 +16,7 @@ export interface SectionSliderProductCardProps {
   headingFontClassName?: string;
   headingClassName?: string;
   subHeading?: string;
+  data?: Product[];
 }
 
 const SectionSliderProductCard: FC<SectionSliderProductCardProps> = ({
@@ -31,104 +28,109 @@ const SectionSliderProductCard: FC<SectionSliderProductCardProps> = ({
   subHeading = "REY backpacks & bags",
 }) => {
   const sliderRef = useRef(null);
-
-  //
+  const id = useId();
   const [isShow, setIsShow] = useState(false);
-  // const queryClient = useQueryClient();
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ["products"],
+  const [glideOptions, setGlideOptions] = useState<Partial<Glide.Options>>({});
+
+  const { data: products = [], isLoading, isError } = useQuery({
+    queryKey: ['products'],
     queryFn: async () => {
-      const response = await getProducts(10, 1);
-      return response.data;
+      const res = await getProducts(8, 1);
+      return res.data || [];
     },
-    select: (res) => res
   });
+
   useEffect(() => {
-    const OPTIONS: Partial<Glide.Options> = {
-      // direction: document.querySelector("html")?.getAttribute("dir") || "ltr",
-      perView: 4,
+    if (!products.length || !sliderRef.current) return;
+
+    const newOptions: Partial<Glide.Options> = {
+      perView: Math.min(4, products.length),
       gap: 32,
-      bound: true,
+      bound: products.length > 4,
+      peek: products.length > 4 ? 0 : { before: 40, after: 40 },
       breakpoints: {
         1280: {
-          perView: 4 - 1,
+          perView: Math.min(4, products.length) - (products.length > 2 ? 1 : 0),
+          peek: products.length > 4 ? 0 : { before: 30, after: 30 }
         },
         1024: {
+          perView: Math.min(3, products.length),
           gap: 20,
-          perView: 4 - 1,
+          peek: products.length > 3 ? 0 : { before: 30, after: 30 }
         },
         768: {
+          perView: Math.min(2, products.length),
           gap: 20,
-          perView: 4 - 2,
+          peek: products.length > 2 ? 0 : { before: 20, after: 20 }
         },
         640: {
+          perView: 1.2,
           gap: 20,
-          perView: 1.5,
+          peek: { before: 20, after: 20 }
         },
-        500: {
-          gap: 20,
-          perView: 1.3,
-        },
-      },
+      }
     };
-    if (!sliderRef.current) return;
 
-    let slider = new Glide(sliderRef.current, OPTIONS);
+    setGlideOptions(newOptions);
+    const slider = new Glide(sliderRef.current, newOptions);
     slider.mount();
     setIsShow(true);
-    return () => {
-      slider.destroy();
-    };
-  }, [sliderRef]);
-  if (isLoading) return (<div>
-    {/* loading animation */}
-    <div className="flex flex-wrap justify-center">
-      <div className="w-16 h-16 bg-gray-200 dark:bg-gray-800 rounded-full animate-bounce m-2"></div>
-      <div className="w-16 h-16 bg-gray-200 dark:bg-gray-800 rounded-full animate-bounce m-2"></div>
-      <div className="w-16 h-16 bg-gray-200 dark:bg-gray-800 rounded-full animate-bounce m-2"></div>
-      <div className="w-16 h-16 bg-gray-200 dark:bg-gray-800 rounded-full animate-bounce m-2"></div>
-    </div>
-  </div>);
+
+    return () => slider.destroy();
+  }, [products.length, sliderRef.current]);
+
+  if (isLoading) {
+    return (
+      <div className={`nc-SectionSliderProductCard ${className}`}>
+        <div className="animate-pulse">
+          <div className="h-12 bg-gray-300 rounded w-1/3 mb-8"></div>
+          <div className="flex gap-4 overflow-hidden">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="min-w-[280px]">
+                <div className="rounded-lg bg-gray-300 h-96 w-full"></div>
+                <div className="h-4 bg-gray-300 rounded w-3/4 mt-4"></div>
+                <div className="h-4 bg-gray-300 rounded w-1/2 mt-2"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (isError) {
-    // console.log("Error", isError);
-    return <div>Error...</div>
-  };
+    return (
+      <div className={`nc-SectionSliderProductCard ${className}`}>
+        <div className="text-red-500">
+          Error when fetching data
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`nc-SectionSliderProductCard ${className}`}>
-      <div ref={sliderRef} className={`flow-root ${isShow ? "" : ""}`}>
+      <div ref={sliderRef} className={`flow-root ${isShow ? "" : "invisible"}`}>
         <Heading
           className={headingClassName}
           fontClass={headingFontClassName}
           rightDescText={subHeading}
-          hasNextPrev
+          hasNextPrev={products.length > 4}
         >
           {heading || `New Arrivals`}
         </Heading>
+        
         <div className="glide__track" data-glide-el="track">
           <ul className="glide__slides">
-            {data && data.map((item: Product , index: number) => (
-              <li key={index} className={`glide__slide  ${itemClassName}`}>
-                <ProductCard data={item} className="h-96 w-96" />
-                {/* <p className="text-rose-950">{item.name}</p> */}
+            {products.map((item: Product) => (
+              <li key={`${id}-${item._id}`} className={`glide__slide ${itemClassName}`}>
+                <ProductCard data={item} />
               </li>
             ))}
           </ul>
         </div>
       </div>
     </div>
-    // <div>
-    //   {data && data.map((item: Product, index: number) => (
-    //     <div key={index}>
-    //       <p className="text-rose-950">{item.name}</p>
-    //       <Image
-    //         src={item.images[0]}
-    //         alt={item.name}
-    //         width={200}
-    //         height={200}
-    //       />
-    //     </div>
-    //   ))}
-    // </div>
   );
 };
 
