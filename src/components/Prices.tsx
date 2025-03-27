@@ -22,17 +22,17 @@ const Prices: FC<PricesProps> = ({
       </div> */}
       {
         discountedPrice ? (
-          <div className="flex items-center">
+          <div className={`flex items-center `}>
             <span className="text-gray-500 line-through !leading-none">
               ৳{String(price)}
             </span>
-            <span className="text-primary-6000 !leading-none">
+            <span className={`text-green-500 !leading-none border-2 border-green-500 rounded-lg ml-2 ${contentClass}`}>
               ৳{String(discountedPrice)}
             </span>
           </div>
         ) : (
-          <div className="flex items-center">
-            <span className="text-primary-6000 !leading-none">
+          <div className={`flex items-center border-2 border-green-500 rounded-lg ${contentClass}`} >
+            <span className="text-green-500 !leading-none">
               ৳{String(price)}
             </span>
           </div>

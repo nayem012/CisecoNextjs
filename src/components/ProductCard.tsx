@@ -151,6 +151,8 @@ const ProductCard: FC<ProductCardProps> = ({
           <ArrowsPointingOutIcon className="w-3.5 h-3.5" />
           <span className="ms-1">Quick view</span>
         </ButtonSecondary>
+        {/* size list */}
+        {renderSizeList()}
       </div>
     );
   };
@@ -161,7 +163,7 @@ const ProductCard: FC<ProductCardProps> = ({
     }
 
     return (
-      <div className="absolute bottom-0 inset-x-1 space-x-1.5 rtl:space-x-reverse flex justify-center opacity-0 invisible group-hover:bottom-4 group-hover:opacity-100 group-hover:visible transition-all">
+      <div className="absolute right-full inset-x-1 space-y-1.5 rtl:space-y-reverse flex flex-col align-center opacity-0 invisible group-hover:bottom-4 group-hover:opacity-100 group-hover:visible transition-all">
         {sizeInventory.map((sizeItem, index) => (
           <div
             key={index}
@@ -208,7 +210,7 @@ const prodLink: UrlObject  = {
               {name}
             </h2>
             <p className={`text-sm text-slate-500 dark:text-slate-400 mt-1 `}>
-              {description}
+              {description.slice(0, 100)}...
             </p>
           </div>
 
