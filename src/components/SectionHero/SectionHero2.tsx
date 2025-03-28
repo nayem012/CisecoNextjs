@@ -50,7 +50,7 @@ const SectionHero2: FC<SectionHero2Props> = ({ className = "" }) => {
     return (
       <div
         className={`nc-SectionHero2Item nc-SectionHero2Item--animation relative overflow-hidden ${className} flex items-center justify-center min-h-[300px] sm:min-h-[400px]
-         animated-background bg-gradient-to-r from-blue-500/80 via-purple-500/80 to-indigo-500/70 text-white rounded-lg shadow-lg px-6 py-12`}
+         animated-background bg-gradient-to-r from-green-100 via-teal-100 to-emerald-100 text-gray-800 rounded-lg shadow-lg px-6 py-12`}
         key={index}
       >
         <div className="text-center">
