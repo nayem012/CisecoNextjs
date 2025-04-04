@@ -185,12 +185,12 @@ export const NAVIGATION_DEMO_2: NavItemType[] = [
   },
   {
     id: ncNanoId(),
-    href: "/jerseys",
+    href: "/comingSoon",
     name: "Perfume",
   },
   {
     id: ncNanoId(),
-    href: "/jerseys",
+    href: "/comingSoon",
     name: "T-shirt",
   },
 
