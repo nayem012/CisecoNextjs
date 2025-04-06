@@ -11,7 +11,7 @@ export interface WidgetFooterMenu {
 
 const widgetMenus: WidgetFooterMenu[] = [
   {
-    id: "5",
+    id: "1",
     title: "Customer Services",
     menus: [
       { href: "/", label: "My Account" },
@@ -21,7 +21,7 @@ const widgetMenus: WidgetFooterMenu[] = [
     ],
   },
   {
-    id: "1",
+    id: "2",
     title: "Information",
     menus: [
       { href: "/", label: "About Us" },
@@ -30,44 +30,21 @@ const widgetMenus: WidgetFooterMenu[] = [
       { href: "/", label: "Return & Exchanges" },
     ],
   },
-  {
-    id: "2",
-    title: "Resources",
-    menus: [
-      { href: "/", label: "Best practices" },
-      { href: "/", label: "Support" },
-      { href: "/", label: "Developers" },
-      { href: "/", label: "Learn design" },
-    ],
-  },
-  {
-    id: "4",
-    title: "Community",
-    menus: [
-      { href: "/", label: "Discussion Forums" },
-      { href: "/", label: "Code of Conduct" },
-      { href: "/", label: "Contributing" },
-      { href: "/", label: "API Reference" },
-    ],
-  },
 ];
 
 const Footer: React.FC = () => {
   const renderWidgetMenuItem = (menu: WidgetFooterMenu, index: number) => {
     return (
       <div key={index} className="text-sm">
-        <h2 className="font-semibold text-neutral-700 dark:text-neutral-200">
+        <h2 className="text-lg font-bold text-neutral-800 dark:text-neutral-100 mb-6">
           {menu.title}
         </h2>
-        <ul className="mt-5 space-y-4">
+        <ul className="space-y-3">
           {menu.menus.map((item, index) => (
             <li key={index}>
               <a
-                key={index}
-                className="text-neutral-6000 dark:text-neutral-300 hover:text-black dark:hover:text-white"
+                className="text-neutral-600 dark:text-neutral-400 hover:text-primary-500 dark:hover:text-primary-400 transition-colors duration-200"
                 href={item.href}
-                target="_blank"
-                rel="noopener noreferrer"
               >
                 {item.label}
               </a>
@@ -79,19 +56,32 @@ const Footer: React.FC = () => {
   };
 
   return (
-    <div className="nc-Footer relative py-20 lg:pt-28 lg:pb-24 border-t border-neutral-200 dark:border-neutral-700">
-      <div className="container grid grid-cols-2 gap-y-10 gap-x-5 sm:gap-x-8 md:grid-cols-4 lg:grid-cols-5 lg:gap-x-10 ">
-        <div className="grid grid-cols-4 gap-5 col-span-2 md:col-span-4 lg:md:col-span-1 lg:flex lg:flex-col">
-          <div className="col-span-2 md:col-span-1">
-            <Logo />
+    <footer className="nc-Footer relative bg-neutral-50 dark:bg-neutral-900 py-16 lg:py-20 border-t border-neutral-200 dark:border-neutral-800">
+      <div className="container">
+        <div className="flex flex-col md:flex-row justify-between">
+          {/* Logo and Socials */}
+          <div className="mb-10 md:mb-0">
+            <Logo className="w-40" />
+            <p className="mt-4 text-neutral-500 dark:text-neutral-400 max-w-xs">
+              Your one-stop shop for quality products and exceptional service.
+            </p>
+            <div className="mt-6">
+              <SocialsList1 className="flex items-center space-x-3" />
+            </div>
           </div>
-          <div className="col-span-2 flex items-center md:col-span-3">
-            <SocialsList1 className="flex items-center space-x-2 lg:space-x-0 lg:flex-col lg:space-y-3 lg:items-start" />
+
+          {/* Menu Columns */}
+          <div className="grid grid-cols-2 gap-10 md:gap-16 lg:gap-20">
+            {widgetMenus.map(renderWidgetMenuItem)}
           </div>
         </div>
-        {widgetMenus.map(renderWidgetMenuItem)}
+
+        {/* Copyright */}
+        <div className="mt-16 pt-8 border-t border-neutral-200 dark:border-neutral-800 text-center text-neutral-500 dark:text-neutral-400 text-sm">
+          &copy; {new Date().getFullYear()} Your Company. All rights reserved.
+        </div>
       </div>
-    </div>
+    </footer>
   );
 };
 
