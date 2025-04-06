@@ -12,22 +12,22 @@ export interface WidgetFooterMenu {
 const widgetMenus: WidgetFooterMenu[] = [
   {
     id: "5",
-    title: "Getting started",
+    title: "Customer Services",
     menus: [
-      { href: "/", label: "Release Notes" },
-      { href: "/", label: "Upgrade Guide" },
-      { href: "/", label: "Browser Support" },
-      { href: "/", label: "Dark Mode" },
+      { href: "/", label: "My Account" },
+      { href: "/", label: "Terms & Conditions" },
+      { href: "/", label: "Contact Us" },
+      { href: "/", label: "Privacy Policy" },
     ],
   },
   {
     id: "1",
-    title: "Explore",
+    title: "Information",
     menus: [
-      { href: "/", label: "Prototyping" },
-      { href: "/", label: "Design systems" },
-      { href: "/", label: "Pricing" },
-      { href: "/", label: "Security" },
+      { href: "/", label: "About Us" },
+      { href: "/", label: "Size Guide" },
+      { href: "/", label: "How to Order" },
+      { href: "/", label: "Return & Exchanges" },
     ],
   },
   {
