@@ -59,7 +59,7 @@ export const useCart = () => {
                 return updated;
             }
             );
-            console.log(data, " dataaaaaa response");
+            // console.log(data, " dataaaaaa response");
             return data;
         },
         enabled: productIds.length > 0,
@@ -71,7 +71,7 @@ export const useCart = () => {
         () => new Map(data?.map(p => [p._id, p])),
         [data]
     );
-    console.log(data, "product data");
+    // console.log(data, "product data");
     // Build display cart
     const cart = useMemo(() => {
         const items: CartItemType[] = [];
