@@ -54,6 +54,47 @@ export interface IRating {
 }
 export type ProductStatus = "New in" | "Limited Edition" | "Sold Out" | "Offer" | "Pre-Order";
 
+export const CATEGORIES = [
+  // tshirt, bracelet, perfume
+  {
+    name: "T-Shirts",
+    slug: "t-shirts",
+  },
+  {
+    name: "Bracelets",
+    slug: "bracelets",
+  },
+  {
+    name: "Perfumes",
+    slug: "perfumes",
+  },
+]
+
+export interface OrderType{
+  orderId: string;
+  orderDate: string;
+  orderStatus: string;
+  totalPrice: number;
+  discount?: number;
+  shippingFee?: number;
+  paymentMethod?: string;
+  paymentStatus?: string;
+  promo?: string;
+  items: Product[];
+}
+
+export interface CartItemType {
+  productId: string;
+  name: string;
+  image: string;
+  price: number;
+  size?: string;
+  originalPrice?: number;
+  priceSnapshot?: number;
+  isValid?: boolean;
+  quantity: number;
+  sizeInventory: ISizeInventory[];
+}
 // const DEMO_VARIANTS: ProductVariant[] = [
 //   {
 //     id: 1,

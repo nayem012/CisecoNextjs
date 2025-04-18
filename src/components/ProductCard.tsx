@@ -4,21 +4,20 @@ import React, { FC, useState } from "react";
 import LikeButton from "./LikeButton";
 import Prices from "./Prices";
 import { ArrowsPointingOutIcon } from "@heroicons/react/24/outline";
-import { Product, ProductStatus } from "@/data/data";
+import { CartItemType, Product, ProductStatus } from "@/data/data";
 import { StarIcon } from "@heroicons/react/24/solid";
 import ButtonPrimary from "@/shared/Button/ButtonPrimary";
 import ButtonSecondary from "@/shared/Button/ButtonSecondary";
-import BagIcon from "./BagIcon";
 import toast from "react-hot-toast";
 import { Transition } from "@/app/headlessui";
 import ModalQuickView from "./ModalQuickView";
-// import ProductStatus from "./ProductStatus";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import NcImage from "@/shared/NcImage/NcImage";
 import ProductStatusIndicator from "./ProductStatus";
 import { UrlObject } from "url";
+import { useCart } from "@/hooks/useCart";
 
 export interface ProductCardProps {
   className?: string;
@@ -50,20 +49,31 @@ const ProductCard: FC<ProductCardProps> = ({
   const {
     _id,
     name,
-    price,
+    price = 0,
     discountedPrice,
     description,
     sizeInventory,
     status,
-    images,
+    images = [],
     rating,
   } = data || defaultProduct;
 
-  const [variantActive, setVariantActive] = useState(0);
   const [showModalQuickView, setShowModalQuickView] = useState(false);
   const router = useRouter();
+  const { addItem, cart } = useCart();
 
-  const notifyAddTocart = ({ size }: { size?: string }) => {
+  const handleAddToCart = (size: string) => {
+    if (!_id || !data) return;
+
+    try {
+      addItem(data, size, 1);
+      showAddToCartToast(size);
+    } catch (error) {
+      toast.error("Failed to add item to cart");
+    }
+  };
+
+  const showAddToCartToast = (size: string) => {
     toast.custom(
       (t) => (
         <Transition
@@ -81,7 +91,7 @@ const ProductCard: FC<ProductCardProps> = ({
             Added to cart!
           </p>
           <div className="border-t border-slate-200 dark:border-slate-700 my-4" />
-          {renderProductCartOnNotify({ size })}
+          {renderProductCartOnNotify(size)}
         </Transition>
       ),
       {
@@ -92,11 +102,15 @@ const ProductCard: FC<ProductCardProps> = ({
     );
   };
 
-  const renderProductCartOnNotify = ({ size }: { size?: string }) => {
+  const renderProductCartOnNotify = (size: string) => {
+    const cartItem = cart.items.find(
+      item => item.productId === _id && item.size === size
+    );
+
     return (
       <div className="flex ">
         <div className="h-24 w-20 flex-shrink-0 overflow-hidden rounded-xl bg-slate-100">
-          {images?.length > 0 && (
+          {images[0] && (
             <Image
               width={80}
               height={96}
@@ -113,14 +127,14 @@ const ProductCard: FC<ProductCardProps> = ({
               <div>
                 <h3 className="text-base font-medium ">{name}</h3>
                 <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                  <span>{size || "XL"}</span>
+                  <span>{size}</span>
                 </p>
               </div>
               <Prices price={price} discountedPrice={discountedPrice} className="mt-0.5" />
             </div>
           </div>
           <div className="flex flex-1 items-end justify-between text-sm">
-            <p className="text-gray-500 dark:text-slate-400">Qty 1</p>
+            <p className="text-gray-500 dark:text-slate-400">Qty {cartItem?.quantity || 1}</p>
             <div className="flex">
               <button
                 type="button"
@@ -151,34 +165,45 @@ const ProductCard: FC<ProductCardProps> = ({
           <ArrowsPointingOutIcon className="w-3.5 h-3.5" />
           <span className="ms-1">Quick view</span>
         </ButtonSecondary>
-        {/* size list */}
         {renderSizeList()}
       </div>
     );
   };
 
   const renderSizeList = () => {
-    if (!sizeInventory || sizeInventory.length === 0) {
-      return null;
-    }
+    if (!sizeInventory?.length) return null;
 
     return (
       <div className="absolute right-full inset-x-1 space-y-1.5 rtl:space-y-reverse flex flex-col align-center opacity-0 invisible group-hover:bottom-4 group-hover:opacity-100 group-hover:visible transition-all">
-        {sizeInventory.map((sizeItem, index) => (
-          <div
-            key={index}
-            className="nc-shadow-lg w-10 h-10 rounded-xl bg-white hover:bg-slate-900 hover:text-white transition-colors cursor-pointer flex items-center justify-center uppercase font-semibold tracking-tight text-sm text-slate-900"
-            onClick={() => notifyAddTocart({ size: sizeItem.size })}
-          >
-            {sizeItem.size}
-          </div>
-        ))}
+        {sizeInventory.map((sizeItem, index) => {
+          const isOutOfStock = sizeItem.stock <= 0;
+          const existingCartItem = cart.items.find(
+            item => item.productId === _id && item.size === sizeItem.size
+          );
+          const maxQuantity = sizeItem.stock - (existingCartItem?.quantity || 0);
+
+          return (
+            <div
+              key={index}
+              className={`nc-shadow-lg w-10 h-10 rounded-xl flex items-center justify-center uppercase font-semibold tracking-tight text-sm ${
+                isOutOfStock || maxQuantity <= 0
+                  ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                  : "bg-white hover:bg-slate-900 hover:text-white cursor-pointer text-slate-900"
+              }`}
+              onClick={() => !isOutOfStock && maxQuantity > 0 && handleAddToCart(sizeItem.size)}
+            >
+              {sizeItem.size}
+            </div>
+          );
+        })}
       </div>
     );
   };
-const prodLink: UrlObject  = {
-  pathname: `/product-detail/${_id}`,
-}
+
+  const prodLink: UrlObject = {
+    pathname: `/product-detail/${_id}`,
+  };
+
   return (
     <>
       <div
@@ -188,7 +213,7 @@ const prodLink: UrlObject  = {
 
         <div className="relative flex-shrink-0 bg-slate-50 dark:bg-slate-300 rounded-3xl overflow-hidden z-1 group">
           <Link href={prodLink} className="block">
-            {images?.length > 0 && (
+            {images[0] && (
               <NcImage
                 containerClassName="flex aspect-w-11 aspect-h-12 w-full h-0"
                 src={images[0]}
@@ -210,7 +235,7 @@ const prodLink: UrlObject  = {
               {name}
             </h2>
             <p className={`text-sm text-slate-500 dark:text-slate-400 mt-1 `}>
-              {description.slice(0, 100)}...
+              {description?.slice(0, 100)}...
             </p>
           </div>
 

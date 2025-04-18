@@ -21,11 +21,11 @@ export interface SectionSliderProductCardProps {
 
 const SectionSliderProductCard: FC<SectionSliderProductCardProps> = ({
   className = "",
-  itemClassName = "",
+  itemClassName = "max-w-[280px]",
   headingFontClassName,
   headingClassName,
   heading,
-  subHeading = "REY backpacks & bags",
+  subHeading = "Our Exclusive Collection",
 }) => {
   const sliderRef = useRef(null);
   const id = useId();

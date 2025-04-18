@@ -1,5 +1,6 @@
 import { NavItemType } from "@/shared/Navigation/NavigationItem";
 import ncNanoId from "@/utils/ncNanoId";
+import { CATEGORIES } from "./data";
 
 export const MEGAMENU_TEMPLATES: NavItemType[] = [
   {
@@ -178,21 +179,12 @@ const OTHER_PAGE_CHILD: NavItemType[] = [
 ];
 
 export const NAVIGATION_DEMO_2: NavItemType[] = [
-  {
+  ...CATEGORIES.map((item) => ({
     id: ncNanoId(),
-    href: "/jerseys",
-    name: "Jerseys",
-  },
-  {
-    id: ncNanoId(),
-    href: "/comingSoon",
-    name: "Perfume",
-  },
-  {
-    id: ncNanoId(),
-    href: "/comingSoon",
-    name: "T-shirt",
-  },
+    href: `/category/${item.slug}` as const,
+    name: item.name,
+  })),
+ // Flatten the array of arrays
 
   // {
   //   id: ncNanoId(),
