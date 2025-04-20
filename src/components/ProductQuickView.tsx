@@ -5,7 +5,7 @@ import LikeButton from "@/components/LikeButton";
 import { StarIcon } from "@heroicons/react/24/solid";
 import BagIcon from "@/components/BagIcon";
 import NcInputNumber from "@/components/NcInputNumber";
-import { Product, ProductStatus } from "@/data/data";
+import { CartItemType, Product, ProductStatus } from "@/data/data";
 import {
   NoSymbolIcon,
   ClockIcon,
@@ -19,7 +19,8 @@ import AccordionInfo from "@/components/AccordionInfo";
 import Image from "next/image";
 import Link from "next/link";
 import { UrlObject } from "url";
-
+// import { useCart } from "@/hooks/useCart";
+import { useCartStore } from "@/app/stores/cartStore";
 export interface ProductQuickViewProps {
   className?: string;
   product: Product;
@@ -42,19 +43,32 @@ const ProductQuickView: FC<ProductQuickViewProps> = ({ className = "", product }
 
   const [sizeSelected, setSizeSelected] = useState(sizeInventory[0]?.size || "");
   const [quantitySelected, setQuantitySelected] = useState(1);
-
+  const { addItem } = useCartStore();
   const notifyAddTocart = () => {
     if (!product) return;
-
+    // convert to CartItemType
+    const cartItem: CartItemType = {
+      ...product,
+      productId: _id,
+      image: images[0] || "/images/placeholder.png",
+      size: sizeSelected,
+      quantity: quantitySelected,
+    };
+    addItem({
+      ...product,
+      productId: _id,
+      size: sizeSelected,
+      quantity: quantitySelected,
+      priceSnapshot: discountedPrice || price,
+    });
     toast.custom(
       (t) => (
-        <></>
-        // <NotifyAddTocart
-        //   product={product}
-        //   quantitySelected={quantitySelected}
-        //   show={t.visible}
-        //   sizeSelected={sizeSelected}
-        // />
+
+        <NotifyAddTocart
+          item={cartItem}
+          show={t.visible}
+          onClose={() => toast.dismiss(t.id)}
+        />
       ),
       { position: "top-right", id: "nc-product-notify", duration: 3000 }
     );
@@ -83,7 +97,7 @@ const ProductQuickView: FC<ProductQuickViewProps> = ({ className = "", product }
           {sizeInventory.map(({ size, stock }) => {
             const isActive = size === sizeSelected;
             const isOutOfStock = stock <= 0;
-            
+
             return (
               <button
                 key={size}
@@ -91,15 +105,13 @@ const ProductQuickView: FC<ProductQuickViewProps> = ({ className = "", product }
                 disabled={isOutOfStock}
                 className={`relative h-10 sm:h-11 rounded-2xl border flex items-center justify-center 
                   text-sm sm:text-base uppercase font-semibold select-none overflow-hidden z-0
-                  ${
-                    isOutOfStock
-                      ? "text-opacity-20 dark:text-opacity-20 cursor-not-allowed"
-                      : "cursor-pointer"
+                  ${isOutOfStock
+                    ? "text-opacity-20 dark:text-opacity-20 cursor-not-allowed"
+                    : "cursor-pointer"
                   }
-                  ${
-                    isActive
-                      ? "bg-primary-6000 border-primary-6000 text-white hover:bg-primary-6000"
-                      : "border-slate-300 dark:border-slate-600 text-slate-900 dark:text-slate-200 hover:bg-neutral-50 dark:hover:bg-neutral-700"
+                  ${isActive
+                    ? "bg-primary-6000 border-primary-6000 text-white hover:bg-primary-6000"
+                    : "border-slate-300 dark:border-slate-600 text-slate-900 dark:text-slate-200 hover:bg-neutral-50 dark:hover:bg-neutral-700"
                   }`}
                 onClick={() => setSizeSelected(size)}
                 title={isOutOfStock ? "Out of stock" : `Stock: ${stock}`}
@@ -137,7 +149,7 @@ const ProductQuickView: FC<ProductQuickViewProps> = ({ className = "", product }
 
   const renderSectionContent = () => {
     if (!product) return null;
-    const prodUrl: UrlObject  = {
+    const prodUrl: UrlObject = {
       pathname: `/product-detail/${_id}`,
     };
     return (
@@ -242,7 +254,7 @@ const ProductQuickView: FC<ProductQuickViewProps> = ({ className = "", product }
             <LikeButton className="absolute end-3 top-3" />
           </div>
           <div className="hidden lg:grid grid-cols-2 gap-3 mt-3 sm:gap-6 sm:mt-6">
-            {images.slice(1,3).map((image, index) => (
+            {images.slice(1, 3).map((image, index) => (
               <div key={index} className="aspect-w-3 aspect-h-4">
                 <Image
                   fill

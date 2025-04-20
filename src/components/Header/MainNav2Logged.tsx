@@ -8,6 +8,7 @@ import Navigation from "@/shared/Navigation/Navigation";
 import CartDropdown from "./CartDropdown";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/navigation";
+// import { useCart } from "@/hooks/useCart";
 
 export interface MainNav2LoggedProps {}
 
@@ -15,7 +16,8 @@ const MainNav2Logged: FC<MainNav2LoggedProps> = () => {
   const inputRef = createRef<HTMLInputElement>();
   const [showSearchForm, setShowSearchForm] = useState(false);
   const router = useRouter();
-
+  // const { cart } = useCart();
+  // console.log("cart from MainNav2Logged", cart);
   const renderMagnifyingGlassIcon = () => {
     return (
       <svg
@@ -62,7 +64,7 @@ const MainNav2Logged: FC<MainNav2LoggedProps> = () => {
             className="border-none bg-transparent focus:outline-none focus:ring-0 w-full text-base"
             autoFocus
           />
-          <button type="button" onClick={() => setShowSearchForm(false)}>
+          <button type="button" title="Close search" onClick={() => setShowSearchForm(false)}>
             <XMarkIcon className="w-5 h-5" />
           </button>
         </div>
@@ -70,7 +72,7 @@ const MainNav2Logged: FC<MainNav2LoggedProps> = () => {
       </form>
     );
   };
-
+  
   const renderContent = () => {
     return (
       <div className="h-20 flex justify-between">
@@ -87,7 +89,7 @@ const MainNav2Logged: FC<MainNav2LoggedProps> = () => {
         </div>
 
         <div className="flex-1 flex items-center justify-end text-slate-700 dark:text-slate-100">
-          {!showSearchForm && (
+          {/* {!showSearchForm && (
             <button
               className="hidden lg:flex w-10 h-10 sm:w-12 sm:h-12 rounded-full text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none items-center justify-center"
               onClick={() => setShowSearchForm(!showSearchForm)}
@@ -95,7 +97,7 @@ const MainNav2Logged: FC<MainNav2LoggedProps> = () => {
               {renderMagnifyingGlassIcon()}
             </button>
           )}
-          <AvatarDropdown />
+          <AvatarDropdown /> */}
           <CartDropdown />
         </div>
       </div>

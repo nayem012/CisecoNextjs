@@ -105,32 +105,15 @@ export const useCart = () => {
         return { items, total, count };
     }, [cartItems, productMap]);
 
-    // Mutation to sync cart to server (optional, if needed)
-    const syncCartMutation = useMutation({
-        mutationFn: async (updatedCart: CartItemType[]) => {
-            const res = await fetch('/api/cart', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(updatedCart),
-            });
-            if (!res.ok) throw new Error('Failed to sync cart');
-            return res.json();
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['cart-products'] });
-        },
-    });
-
     // Internal method to update cart
     const updateCart = useCallback(
         (updater: (prev: CartItemType[]) => CartItemType[]) => {
             setCartItems(prev => {
                 const updated = updater(prev);
-                syncCartMutation.mutate(updated);
                 return updated;
             });
         },
-        [setCartItems, syncCartMutation]
+        [setCartItems]
     );
 
     // Public API
@@ -139,7 +122,7 @@ export const useCart = () => {
             updateCart(prev => {
                 const index = prev.findIndex(item => item.productId === product._id && item.size === size);
                 const priceSnapshot = () => {
-                    if (product.discountedPrice && product.discountedPrice > 0) {
+                    if ((product.discountedPrice ?? 0) > 0) {
                         return product.discountedPrice;
                     } else {
                         return product.price;
@@ -157,7 +140,7 @@ export const useCart = () => {
                         productId: product._id,
                         name: product.name,
                         image: product.images?.[0],
-                        price: priceSnapshot(),
+                        price: priceSnapshot() ?? 0,
                         size,
                         originalPrice: product.price,
                         isValid: true, // Default validity, can be updated later
@@ -190,9 +173,13 @@ export const useCart = () => {
     );
 
     const clearCart = useCallback(() => updateCart(() => []), [updateCart]);
-
+    const refreshCart = useCallback(() => {
+        queryClient.invalidateQueries({ queryKey: ['cart-products'] });
+    }
+        , [queryClient]);
     return {
         cart,
+        cartItems,
         isLoading,
         isError,
         addItem,

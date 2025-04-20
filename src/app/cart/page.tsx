@@ -2,71 +2,107 @@
 import { NoSymbolIcon, CheckIcon } from "@heroicons/react/24/outline";
 import NcInputNumber from "@/components/NcInputNumber";
 import Prices from "@/components/Prices";
-import { CartItemType } from "@/data/data";
+import { CartItemType, Product } from "@/data/data";
 import ButtonPrimary from "@/shared/Button/ButtonPrimary";
 import Image from "next/image";
 import Link from "next/link";
-import { useCart } from "@/hooks/useCart";
-// zod form validation
+import toast from "react-hot-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { useCartStore } from "@/app/stores/cartStore";
+import { useQuery } from "@tanstack/react-query";
+import React from "react";
+
+const schema = z.object({
+  name: z.string().min(1, { message: "Name is required" }),
+  address: z.string().min(1, { message: "Address is required" }),
+  phone: z.string().min(1, { message: "Phone number is required" }),
+});
+
 const CartPage = () => {
-  // Form validation schema for user name, address, and phone number
-  const schema = z.object({
-    name: z.string().min(1, { message: "Name is required" }),
-    address: z.string().min(1, { message: "Address is required" }),
-    phone: z.string().min(1, { message: "Phone number is required" }),
-  });
-  // useForm hook for form handling
+
   const { register, handleSubmit, formState: { errors } } = useForm({
     resolver: zodResolver(schema),
   });
-  // handle form submission
-  const onSubmit = (data: any) => {
-    // get cart items, post to server with user details make sure to handle errors
-    const cartItems = cart.items.map(item => ({
-      productId: item.productId,
-      size: item.size,
-      quantity: item.quantity,
-      price: item.price,
-      name: item.name,
-    }));
-    const orderDetails = {
-      user: data,
-      cartItems,
-    };
-    console.log("Order Details:", orderDetails);
-    
-  };
+
+  // Fetch all products first
+  const { data: products } = useQuery({
+    queryKey: ['cart-products'],
+    queryFn: async (): Promise<Product[]> => {
+      const ids = useCartStore.getState().items.map(item => item.productId).join(',');
+      if (!ids) return [];
+      const response = await fetch(`/api/products?ids=${ids}`);
+      if (!response.ok) throw new Error("Failed to fetch products");
+      const rawProducts = await response.json();
+      return rawProducts.map((product: Product) => ({
+        ...product,
+        priceSnapshot: product.discountedPrice && product.discountedPrice > 0
+          ? product.discountedPrice
+          : product.price,
+        isValid: true,
+        image: product.images[0] || "/default-product.jpg",
+
+      }));
+    }
+  });
+
+  // Use Zustand store with product data
   const { 
-    cart, 
-    removeItem, 
-    updateQuantity, 
+    items: cartItems,
+    removeItem,
+    updateQuantity,
     clearCart,
-    isEmpty
-  } = useCart(); 
-  // console.log(cart.items, "cart items");
+    validateCart
+  } = useCartStore();
+
+  // Validate cart whenever products change
+  React.useEffect(() => {
+    if (products) {
+      validateCart(products);
+    }
+  }, [products, validateCart]);
+
+  const onSubmit = async (formData: any) => {
+    try {
+      const orderDetails = {
+        user: formData,
+        cartItems: cartItems.map(item => ({
+          productId: item.productId,
+          size: item.size,
+          quantity: item.quantity,
+          price: item.priceSnapshot,
+          name: item.name,
+        }))
+      };
+
+      const response = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(orderDetails),
+      });
+
+      if (!response.ok) throw new Error("Order failed");
+      
+      toast.success("Order placed successfully!");
+      clearCart();
+    } catch (error) {
+      console.error("Order error:", error);
+      toast.error("Failed to place order");
+    }
+  };
+
   const renderStatus = (item: CartItemType) => {
-    const product = cart.items.find(p => p.productId === item.productId);
-    if (!product) {
+    if (!item.isValid) {
       return (
         <div className="rounded-full flex items-center justify-center px-2.5 py-1.5 text-xs text-red-500 border border-red-300">
           <NoSymbolIcon className="w-3.5 h-3.5" />
-          <span className="ml-1 leading-none">Item Error</span>
+          <span className="ml-1 leading-none">Out of Stock</span>
         </div>
       );
     }
 
-    const sizeStock = product.sizeInventory?.find(si => si.size === item.size)?.stock || 0;
-    const isOutOfStock = sizeStock < item.quantity;
-
-    return isOutOfStock ? (
-      <div className="rounded-full flex items-center justify-center px-2.5 py-1.5 text-xs text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-        <NoSymbolIcon className="w-3.5 h-3.5" />
-        <span className="ml-1 leading-none">Sold Out</span>
-      </div>
-    ) : (
+    return (
       <div className="rounded-full flex items-center justify-center px-2.5 py-1.5 text-xs text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
         <CheckIcon className="w-3.5 h-3.5" />
         <span className="ml-1 leading-none">In Stock</span>
@@ -74,71 +110,66 @@ const CartPage = () => {
     );
   };
 
-  const renderProduct = (item: CartItemType, index: number) => {
+  const renderProduct = (item: CartItemType & { price: number; sizeInventory: Array<{ size: string; stock: number }> }) => {
+      const product = products?.find((p: { _id: string }) => p._id === item.productId);
+    
     return (
-      <div
-        key={`${item.productId}-${item.size}`}
-        className="relative flex py-8 sm:py-10 xl:py-12 first:pt-0 last:pb-0"
-      >
+      <div key={`${item.productId}-${item.size}`} className="relative flex py-8 sm:py-10 xl:py-12 first:pt-0 last:pb-0">
         <div className="relative h-36 w-24 sm:w-32 flex-shrink-0 overflow-hidden rounded-xl bg-slate-100">
           <Image
             fill
-            src={item.image}
+            src={item.image || "/default-product.jpg"}
             alt={item.name}
             sizes="300px"
             className="h-full w-full object-contain object-center"
           />
-          <Link href={{pathname: `/product-detail/${item.productId}`}} className="absolute inset-0" />
+          <Link href={`/product-detail/${item.productId}`} className="absolute inset-0" />
         </div>
 
         <div className="ml-3 sm:ml-6 flex flex-1 flex-col">
-          <div>
-            <div className="flex justify-between">
-              <div className="flex-[1.5]">
-                <h3 className="text-base font-semibold">
-                  <Link href={{pathname: `/product-detail/${item.productId}`}}>{item.name}</Link>
-                </h3>
-                <div className="mt-1.5 sm:mt-2.5 flex text-sm text-slate-600 dark:text-slate-300">
-                  {item.size && (
-                    <>
-                      <div className="flex items-center space-x-1.5">
-                        <span>{item.size}</span>
-                      </div>
-                      <span className="mx-4 border-l border-slate-200 dark:border-slate-700" />
-                    </>
-                  )}
-                </div>
-
-                <div className="mt-3 flex justify-between w-full sm:hidden relative">
-                  <NcInputNumber
-                    defaultValue={item.quantity}
-                    onChange={(quantity) => updateQuantity(item.productId, item.size || '', quantity)}
-                  />
-                  <Prices
-                    contentClass="py-1 px-2 md:py-1.5 md:px-2.5 text-sm font-medium h-full"
-                    price={item.price}
-                  />
-                </div>
+          <div className="flex justify-between">
+            <div className="flex-[1.5]">
+              <h3 className="text-base font-semibold">
+                <Link href={`/product-detail/${item.productId}`}>{item.name}</Link>
+              </h3>
+              <div className="mt-1.5 sm:mt-2.5 flex text-sm text-slate-600 dark:text-slate-300">
+                {item.size && (
+                  <div className="flex items-center space-x-1.5">
+                    <span>{item.size}</span>
+                    {product && (
+                      <span className="text-slate-500">
+                        (Stock: {product.sizeInventory.find(si => si.size === item.size)?.stock || 0})
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
 
-              <div className="hidden sm:block text-center relative">
+              <div className="mt-3 flex justify-between w-full sm:hidden relative">
                 <NcInputNumber
                   defaultValue={item.quantity}
-                  onChange={(quantity) => updateQuantity(item.productId, item.size || '', quantity)}
+                  onChange={(quantity) => updateQuantity(item.productId, item.size || "", quantity)}
                 />
+                <Prices price={item.priceSnapshot??0 * item.quantity} />
               </div>
+            </div>
 
-              <div className="hidden flex-1 sm:flex justify-end">
-                <Prices price={item.price} className="mt-0.5" />
-              </div>
+            <div className="hidden sm:block text-center relative">
+              <NcInputNumber
+                defaultValue={item.quantity}
+                onChange={(quantity) => updateQuantity(item.productId, item.size||"", quantity)}
+              />
+            </div>
+
+            <div className="hidden flex-1 sm:flex justify-end">
+              <Prices price={item.priceSnapshot??0 * item.quantity} />
             </div>
           </div>
 
           <div className="flex mt-auto pt-4 items-end justify-between text-sm">
             {renderStatus(item)}
             <button
-              onClick={() => {
-                removeItem(item.productId, item.size || '')}}
+              onClick={() => removeItem(item.productId, item.size || "")}
               className="relative z-10 flex items-center mt-3 font-medium text-primary-6000 hover:text-primary-500 text-sm"
             >
               <span>Remove</span>
@@ -150,8 +181,10 @@ const CartPage = () => {
   };
 
   const calculateOrderSummary = () => {
-    const subtotal = cart.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const shipping = subtotal > 100 ? 0 : 5;
+    const subtotal = cartItems.reduce((sum, item) => 
+      sum + (item.priceSnapshot * item.quantity), 0
+    );
+    const shipping = 80;
     const tax = subtotal * 0.1;
     const total = subtotal + shipping + tax;
 
@@ -159,30 +192,27 @@ const CartPage = () => {
   };
 
   const { subtotal, shipping, tax, total } = calculateOrderSummary();
+  const disableCheckout = cartItems.length === 0 || 
+    cartItems.some(item => !item.isValid) ||
+    Object.keys(errors).length > 0;
 
   return (
     <div className="nc-CartPage">
       <main className="container py-16 lg:pb-28 lg:pt-20">
-        <div className="mb-12 sm:mb-16">
-          <h2 className="block text-2xl sm:text-3xl lg:text-4xl font-semibold">
-            Shopping Cart
-          </h2>
-          {/* <p>
-            items: {cart.items.map(item => item.name).join(', ')}
-          </p> */}
-          <div className="block mt-3 sm:mt-5 text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-400">
-            <Link href="/">Homepage</Link>
-            <span className="text-xs mx-1 sm:mx-1.5">/</span>
-            <span className="underline">Shopping Cart</span>
-          </div>
-        </div>
-
-        <hr className="border-slate-200 dark:border-slate-700 my-10 xl:my-12" />
-
-        <div className="flex flex-col lg:flex-row">
+        {/* ... rest of the JSX remains similar to previous version ... */}
+        <div className="flex flex-col lg:flex-row first-letter:first-line:space-y-8 lg:space-y-0 lg:space-x-8">
           <div className="w-full lg:w-[60%] xl:w-[55%] divide-y divide-slate-200 dark:divide-slate-700">
-            {!isEmpty ? (
-              cart.items.map(renderProduct)
+            {cartItems.length > 0 ? (
+              cartItems.map((item) => {
+                const product = products?.find((p) => p._id === item.productId);
+                if (!product) return null;
+                return renderProduct({
+                  ...item,
+                  price: product.price,
+                  sizeInventory: product.sizeInventory,
+                  image: item.image || "/default-product.jpg",
+                });
+              })
             ) : (
               <div className="text-center py-10">
                 <p className="text-slate-500 dark:text-slate-400">Your cart is empty</p>
@@ -190,7 +220,7 @@ const CartPage = () => {
             )}
           </div>
 
-          {cart.items.length > 0 && (
+          {cartItems.length > 0 && (
             <>
               <div className="border-t lg:border-t-0 lg:border-l border-slate-200 dark:border-slate-700 my-10 lg:my-0 lg:mx-10 xl:mx-16 2xl:mx-20 flex-shrink-0"></div>
 

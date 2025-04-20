@@ -17,7 +17,8 @@ import Link from "next/link";
 import NcImage from "@/shared/NcImage/NcImage";
 import ProductStatusIndicator from "./ProductStatus";
 import { UrlObject } from "url";
-import { useCart } from "@/hooks/useCart";
+import { useCartStore } from "@/app/stores/cartStore";
+import { useQueryClient } from "@tanstack/react-query";
 
 export interface ProductCardProps {
   className?: string;
@@ -60,14 +61,25 @@ const ProductCard: FC<ProductCardProps> = ({
 
   const [showModalQuickView, setShowModalQuickView] = useState(false);
   const router = useRouter();
-  const { addItem, cart } = useCart();
-
+  const queryClient = useQueryClient();
+  const { addItem, items: cartItems } = useCartStore();
+  
   const handleAddToCart = (size: string) => {
     if (!_id || !data) return;
 
     try {
-      addItem(data, size, 1);
+      addItem({
+        productId: _id,
+        name,
+        priceSnapshot: discountedPrice || price,
+        size,
+        quantity: 1,
+        image: images[0],
+        // Removed sizeInventory as it is not a valid property
+        // isValid: true,
+      });
       showAddToCartToast(size);
+      queryClient.invalidateQueries({ queryKey: ['cart-products'] });
     } catch (error) {
       toast.error("Failed to add item to cart");
     }
@@ -103,7 +115,7 @@ const ProductCard: FC<ProductCardProps> = ({
   };
 
   const renderProductCartOnNotify = (size: string) => {
-    const cartItem = cart.items.find(
+    const cartItem = cartItems.find(
       item => item.productId === _id && item.size === size
     );
 
@@ -177,7 +189,7 @@ const ProductCard: FC<ProductCardProps> = ({
       <div className="absolute right-full inset-x-1 space-y-1.5 rtl:space-y-reverse flex flex-col align-center opacity-0 invisible group-hover:bottom-4 group-hover:opacity-100 group-hover:visible transition-all">
         {sizeInventory.map((sizeItem, index) => {
           const isOutOfStock = sizeItem.stock <= 0;
-          const existingCartItem = cart.items.find(
+          const existingCartItem = cartItems.find(
             item => item.productId === _id && item.size === sizeItem.size
           );
           const maxQuantity = sizeItem.stock - (existingCartItem?.quantity || 0);
