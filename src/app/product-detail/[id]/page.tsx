@@ -33,9 +33,10 @@ const ProductDetailPage = () => {
   const { data: product, isLoading, isError } = useQuery<Product>({
     queryKey: ['product', id],
     queryFn: async () => {
-      const res = await fetch(`/api/products/${id}`);
+      const res = await fetch(`/api/products?ids=${id}`);
       if (!res.ok) throw new Error('Product not found');
-      return res.json();
+      const data = await res.json();
+      return data[0] as Product;
     },
     enabled: !!id
   });
