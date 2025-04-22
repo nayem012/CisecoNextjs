@@ -1,11 +1,7 @@
-// get method with pagination, sorting and filtering
+//api/products/route.ts
 import { NextResponse } from 'next/server';
 
 import { apiURL } from "@/lib/config";
-// export async function getProducts(limit: number = 10, page: number = 1): Promise<any> {
-//     const res = await fetch(`${apiURL}products?limit=${limit}&page=${page}`);
-//     return res.json();
-// }
 
 export async function GET(request: Request) {
     // console.log(request, "request from api");

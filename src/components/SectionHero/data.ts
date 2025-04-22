@@ -17,21 +17,21 @@ export const HERO2_DEMO_DATA: Hero2DataType[] = [
     heading: "Artexo",
     subHeading: "Discover exclusive designs crafted with passion ❤️",
     btnText: "Shop Now 🛒",
-    btnLink: "/",
+    btnLink: "/collection",
   },
   {
     image: imageRightPng3,
     heading: "Artexo",
     subHeading: "Stand out with unique styles from the heart of fashion 🔥",
     btnText: "Explore Collection 🔍",
-    btnLink: "/",
+    btnLink: "/collection",
   },
   {
     image: imageRightPng,
     heading: "Artexo",
     subHeading: "Elevate your wardrobe with our latest trends 😍",
     btnText: "Get Yours Today 🎉",
-    btnLink: "/",
+    btnLink: "/collection",
   },
 ];
 

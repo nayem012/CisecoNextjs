@@ -16,6 +16,7 @@ import React from "react";
 
 const schema = z.object({
   name: z.string().min(1, { message: "Name is required" }),
+  email: z.string().email({ message: "Invalid email address" }),
   address: z.string().min(1, { message: "Address is required" }),
   phone: z.string().min(1, { message: "Phone number is required" }),
 });
@@ -76,7 +77,7 @@ const CartPage = () => {
         }))
       };
 
-      const response = await fetch("/api/orders", {
+      const response = await fetch("/api/cart", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(orderDetails),
@@ -275,6 +276,19 @@ const CartPage = () => {
                     </div>
                     <div className="mb-4">
                       <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                        Email
+                      </label>
+                      <input
+                        type="email"
+                        {...register("email")}
+                        className="mt-1 block w-full border border-slate-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500"
+                      />
+                      {errors.email && (
+                        <p className="mt-2 text-sm text-red-600">{errors.email.message}</p>
+                      )}
+                    </div>
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
                         Address
                       </label>
                       <input
@@ -300,7 +314,7 @@ const CartPage = () => {
                       )}
                     </div>
                     <ButtonPrimary type="submit" className="w-full mt-4">
-                      Checkout
+                      Place order
                     </ButtonPrimary>
                   </form>
                   

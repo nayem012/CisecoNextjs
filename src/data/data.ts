@@ -60,14 +60,14 @@ export const CATEGORIES = [
     name: "T-Shirts",
     slug: "t-shirts",
   },
-  {
-    name: "Bracelets",
-    slug: "bracelets",
-  },
-  {
-    name: "Perfumes",
-    slug: "perfumes",
-  },
+  // {
+  //   name: "Bracelets",
+  //   slug: "bracelets",
+  // },
+  // {
+  //   name: "Perfumes",
+  //   slug: "perfumes",
+  // },
 ]
 
 export interface OrderType{

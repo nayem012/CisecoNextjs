@@ -181,7 +181,7 @@ const OTHER_PAGE_CHILD: NavItemType[] = [
 export const NAVIGATION_DEMO_2: NavItemType[] = [
   ...CATEGORIES.map((item) => ({
     id: ncNanoId(),
-    href: `/category/${item.slug}` as const,
+    href: `/collection` as const,
     name: item.name,
   })),
  // Flatten the array of arrays

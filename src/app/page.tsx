@@ -38,7 +38,7 @@ function PageHome() {
         </div> */}
         {/* <SectionPromo1 /> */}
 
-        <div className="relative py-24 lg:py-32">
+        {/* <div className="relative py-24 lg:py-32">
           <BackgroundSection />
           <SectionGridMoreExplore />
         </div>
@@ -46,7 +46,7 @@ function PageHome() {
         <SectionSliderProductCard
           heading="Best Sellers"
           subHeading="Best selling of the month"
-        />
+        /> */}
 
         <SectionPromo2 />
 
