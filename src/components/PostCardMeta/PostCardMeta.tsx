@@ -18,7 +18,7 @@ const PostCardMeta: FC<PostCardMetaProps> = ({
       data-nc-id="PostCardMeta"
     >
       <Link
-        href={"/blog"}
+        href={"/"}
         className="flex-shrink-0 relative flex items-center space-x-2"
       >
         {!hiddenAvatar && (

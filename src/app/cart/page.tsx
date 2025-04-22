@@ -28,7 +28,7 @@ const CartPage = () => {
   });
 
   // Fetch all products first
-  const { data: products } = useQuery({
+  const { data: products, isLoading, isError } = useQuery({
     queryKey: ['cart-products'],
     queryFn: async (): Promise<Product[]> => {
       const ids = useCartStore.getState().items.map(item => item.productId).join(',');
@@ -42,7 +42,7 @@ const CartPage = () => {
           ? product.discountedPrice
           : product.price,
         isValid: true,
-        image: product.images[0] || "/default-product.jpg",
+        image: product.images[0] || "",
 
       }));
     }
@@ -111,7 +111,7 @@ const CartPage = () => {
     );
   };
 
-  const renderProduct = (item: CartItemType & { price: number; sizeInventory: Array<{ size: string; stock: number }> }) => {
+  const renderProduct = (item: CartItemType & { price: number; discountedPrice: number; sizeInventory: Array<{ size: string; stock: number }> }) => {
       const product = products?.find((p: { _id: string }) => p._id === item.productId);
     
     return (
@@ -119,7 +119,7 @@ const CartPage = () => {
         <div className="relative h-36 w-24 sm:w-32 flex-shrink-0 overflow-hidden rounded-xl bg-slate-100">
           <Image
             fill
-            src={item.image || "/default-product.jpg"}
+            src={item.image || ""}
             alt={item.name}
             sizes="300px"
             className="h-full w-full object-contain object-center"
@@ -151,7 +151,7 @@ const CartPage = () => {
                   defaultValue={item.quantity}
                   onChange={(quantity) => updateQuantity(item.productId, item.size || "", quantity)}
                 />
-                <Prices price={item.priceSnapshot??0 * item.quantity} />
+                <Prices price={item.priceSnapshot??0 * item.quantity} discountedPrice={item.priceSnapshot}/>
               </div>
             </div>
 
@@ -197,6 +197,13 @@ const CartPage = () => {
     cartItems.some(item => !item.isValid) ||
     Object.keys(errors).length > 0;
 
+  if (isLoading) return (
+    // Loading with skeleton or spinner
+    <div className="flex items-center justify-center h-screen">
+      <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
+    </div>
+  )
+  if (isError) return <div>Error loading products</div>;
   return (
     <div className="nc-CartPage">
       <main className="container py-16 lg:pb-28 lg:pt-20">
@@ -210,8 +217,10 @@ const CartPage = () => {
                 return renderProduct({
                   ...item,
                   price: product.price,
+                  discountedPrice: product.discountedPrice ??0,
                   sizeInventory: product.sizeInventory,
-                  image: item.image || "/default-product.jpg",
+                  image: product.images[0] || "",
+                  name: product.name,
                 });
               })
             ) : (

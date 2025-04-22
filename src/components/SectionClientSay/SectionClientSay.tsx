@@ -139,6 +139,7 @@ const SectionClientSay: FC<SectionClientSayProps> = ({ className = "" }) => {
           >
             {DEMO_DATA.map((item, index) => (
               <button
+              aria-label="btn"
                 key={item.id}
                 className="glide__bullet w-2 h-2 rounded-full bg-neutral-300 mx-1 focus:outline-none"
                 data-glide-dir={`=${index}`}

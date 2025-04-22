@@ -104,6 +104,7 @@ export default function SharedModal({
                 <>
                   {index > 0 && (
                     <button
+                      aria-label="previous"
                       className="absolute left-3 top-[calc(50%-16px)] rounded-full bg-black/50 p-3 text-white/75 backdrop-blur-lg transition hover:bg-black/75 hover:text-white focus:outline-none"
                       style={{ transform: "translate3d(0, 0, 0)" }}
                       onClick={() => changePhotoId(index - 1)}
@@ -113,6 +114,7 @@ export default function SharedModal({
                   )}
                   {index + 1 < images.length && (
                     <button
+                      aria-label="next"
                       className="absolute right-3 top-[calc(50%-16px)] rounded-full bg-black/50 p-3 text-white/75 backdrop-blur-lg transition hover:bg-black/75 hover:text-white focus:outline-none"
                       style={{ transform: "translate3d(0, 0, 0)" }}
                       onClick={() => changePhotoId(index + 1)}
