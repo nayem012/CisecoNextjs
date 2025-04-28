@@ -38,12 +38,8 @@ const CartPage = () => {
       const rawProducts = await response.json();
       return rawProducts.map((product: Product) => ({
         ...product,
-        priceSnapshot: product.discountedPrice && product.discountedPrice > 0
-          ? product.discountedPrice
-          : product.price,
         isValid: true,
         image: product.images[0] || "",
-
       }));
     }
   });
@@ -68,13 +64,7 @@ const CartPage = () => {
     try {
       const orderDetails = {
         user: formData,
-        cartItems: cartItems.map(item => ({
-          productId: item.productId,
-          size: item.size,
-          quantity: item.quantity,
-          price: item.priceSnapshot,
-          name: item.name,
-        }))
+        cartItems: cartItems,
       };
 
       const response = await fetch("/api/cart", {
@@ -113,7 +103,8 @@ const CartPage = () => {
 
   const renderProduct = (item: CartItemType & { price: number; discountedPrice: number; sizeInventory: Array<{ size: string; stock: number }> }) => {
       const product = products?.find((p: { _id: string }) => p._id === item.productId);
-    
+    // console.log(disconnectedPrice, "discountedPrice")
+    console.log("discountedPrice", item.discountedPrice, "price", item.price)
     return (
       <div key={`${item.productId}-${item.size}`} className="relative flex py-8 sm:py-10 xl:py-12 first:pt-0 last:pb-0">
         <div className="relative h-36 w-24 sm:w-32 flex-shrink-0 overflow-hidden rounded-xl bg-slate-100">
@@ -151,7 +142,7 @@ const CartPage = () => {
                   defaultValue={item.quantity}
                   onChange={(quantity) => updateQuantity(item.productId, item.size || "", quantity)}
                 />
-                <Prices price={item.priceSnapshot??0 * item.quantity} discountedPrice={item.priceSnapshot}/>
+                <Prices price={item.price??0 * item.quantity} discountedPrice={item.discountedPrice*item.quantity}/>
               </div>
             </div>
 
@@ -163,7 +154,7 @@ const CartPage = () => {
             </div>
 
             <div className="hidden flex-1 sm:flex justify-end">
-              <Prices price={item.priceSnapshot??0 * item.quantity} />
+              <Prices price={item.price??0 * item.quantity} discountedPrice={item.discountedPrice*item.quantity} />
             </div>
           </div>
 
@@ -182,9 +173,17 @@ const CartPage = () => {
   };
 
   const calculateOrderSummary = () => {
-    const subtotal = cartItems.reduce((sum, item) => 
-      sum + (item.priceSnapshot * item.quantity), 0
-    );
+    // const subtotal = cartItems.reduce((sum, item) => 
+    //   sum + (item.priceSnapshot * item.quantity), 0
+    // );
+    // if discountprice is greater than zero than calculate with discounted price or calculate with the price
+    const subtotal = cartItems.reduce((sum, item) => {
+      const product = products?.find((p) => p._id === item.productId);
+      if (product && product.discountedPrice > 0) {
+        return sum + (product.discountedPrice * item.quantity);
+      }
+      return sum + (item.price * item.quantity);
+    }, 0);
     const shipping = 80;
     const tax = subtotal * 0.1;
     const total = subtotal + shipping + tax;
@@ -204,6 +203,7 @@ const CartPage = () => {
     </div>
   )
   if (isError) return <div>Error loading products</div>;
+  console.log(products, "products"); 
   return (
     <div className="nc-CartPage">
       <main className="container py-16 lg:pb-28 lg:pt-20">

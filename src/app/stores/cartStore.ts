@@ -1,17 +1,7 @@
 import { Product } from '@/data/data'
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
-
-export type CartItemType = {
-  productId: string
-  size: string
-  quantity: number
-  addedAt: number
-  priceSnapshot: number
-  isValid?: boolean
-  name: string
-  image?: string
-}
+import { CartItemType } from '@/data/data'
 
 type CartState = {
   items: CartItemType[]
@@ -73,6 +63,8 @@ export const useCartStore = create<CartState>()(
       }),
 
       clearCart: () => set({ items: [] }),
+
+      getCart: () => get().items,
     }),
     {
       name: 'artexo-cart',

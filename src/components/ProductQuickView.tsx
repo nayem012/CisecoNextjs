@@ -54,13 +54,7 @@ const ProductQuickView: FC<ProductQuickViewProps> = ({ className = "", product }
       size: sizeSelected,
       quantity: quantitySelected,
     };
-    addItem({
-      ...product,
-      productId: _id,
-      size: sizeSelected,
-      quantity: quantitySelected,
-      priceSnapshot: discountedPrice || price,
-    });
+    addItem(cartItem);
     toast.custom(
       (t) => (
 

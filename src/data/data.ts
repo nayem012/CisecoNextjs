@@ -31,7 +31,7 @@ export interface Product {
   name: string;
   description: string;
   price: number;
-  discountedPrice?: number;
+  discountedPrice: number;
   category: string;
   images: string[];
   sku: string;
@@ -75,8 +75,8 @@ export interface OrderType{
   orderDate: string;
   orderStatus: string;
   totalPrice: number;
-  discount?: number;
-  shippingFee?: number;
+  discount: number;
+  shippingFee: number;
   paymentMethod?: string;
   paymentStatus?: string;
   promo?: string;
@@ -88,9 +88,8 @@ export interface CartItemType {
   name: string;
   image: string;
   price: number;
-  size?: string;
-  originalPrice?: number;
-  priceSnapshot?: number;
+  discountedPrice: number;
+  size: string;
   isValid?: boolean;
   quantity: number;
   sizeInventory: ISizeInventory[];

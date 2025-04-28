@@ -45,6 +45,7 @@ const ProductCard: FC<ProductCardProps> = ({
     metaTitle: "",
     metaDescription: "",
     productTags: [],
+    discountedPrice: 0,
   };
 
   const {
@@ -71,12 +72,12 @@ const ProductCard: FC<ProductCardProps> = ({
       addItem({
         productId: _id,
         name,
-        priceSnapshot: discountedPrice || price,
+        price,
+        discountedPrice,
         size,
         quantity: 1,
         image: images[0],
-        // Removed sizeInventory as it is not a valid property
-        // isValid: true,
+        sizeInventory: sizeInventory,
       });
       showAddToCartToast(size);
       queryClient.invalidateQueries({ queryKey: ['cart-products'] });
