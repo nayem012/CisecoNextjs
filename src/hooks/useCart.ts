@@ -90,9 +90,10 @@ export const useCart = () => {
                 productId: `${product._id}`,
                 name: product.name,
                 image: product.images?.[0],
-                price: currentPrice,
+                // price: currentPrice,
                 size: cartItem.size,
-                originalPrice: cartItem.priceSnapshot,
+                price: product.price,
+                discountedPrice: product.discountedPrice,
                 isValid,
                 quantity: cartItem.quantity,
                 sizeInventory: product.sizeInventory,
@@ -119,37 +120,37 @@ export const useCart = () => {
     // Public API
     const addItem = useCallback(
         (product: Product, size: string, quantity: number) => {
-            updateCart(prev => {
-                const index = prev.findIndex(item => item.productId === product._id && item.size === size);
-                const priceSnapshot = () => {
-                    if ((product.discountedPrice ?? 0) > 0) {
-                        return product.discountedPrice;
-                    } else {
-                        return product.price;
-                    }
-                }
-                if (index !== -1) {
-                    const updated = [...prev];
-                    updated[index].quantity += quantity;
-                    return updated;
-                }
+            // updateCart(prev => {
+            //     const index = prev.findIndex(item => item.productId === product._id && item.size === size);
+            //     const priceSnapshot = () => {
+            //         if ((product.discountedPrice ?? 0) > 0) {
+            //             return product.discountedPrice;
+            //         } else {
+            //             return product.price;
+            //         }
+            //     }
+            //     if (index !== -1) {
+            //         const updated = [...prev];
+            //         updated[index].quantity += quantity;
+            //         return updated;
+            //     }
 
-                return [
-                    ...prev,
-                    {
-                        productId: product._id,
-                        name: product.name,
-                        image: product.images?.[0],
-                        price: priceSnapshot() ?? 0,
-                        size,
-                        originalPrice: product.price,
-                        isValid: true, // Default validity, can be updated later
-                        quantity,
-                        addedAt: Date.now(),
-                        sizeInventory: product.sizeInventory,
-                    },
-                ];
-            });
+            //     return [
+            //         ...prev,
+            //         {
+            //             productId: product._id,
+            //             name: product.name,
+            //             image: product.images?.[0],
+            //             price: priceSnapshot() ?? 0,
+            //             size,
+            //             originalPrice: product.price,
+            //             isValid: true, // Default validity, can be updated later
+            //             quantity,
+            //             addedAt: Date.now(),
+            //             sizeInventory: product.sizeInventory,
+            //         },
+            //     ];
+            // });
         },
         [updateCart]
     );

@@ -14,7 +14,7 @@ interface Props {
 }
 
 const NotifyAddToCart: FC<Props> = ({ show, item, onClose }) => {
-  const displayPrice = item.priceSnapshot ?? item.price;
+  const displayPrice = item.discountedPrice ?? item.price;
 
   return (
     <Transition

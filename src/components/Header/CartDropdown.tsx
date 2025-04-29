@@ -8,7 +8,8 @@ import ButtonSecondary from "@/shared/Button/ButtonSecondary";
 import Image from "next/image";
 import Link from "next/link";
 import { TrashIcon as TrashSolid } from '@heroicons/react/20/solid';
-import { CartItemType, useCartStore } from "@/app/stores/cartStore";
+import { useCartStore } from "@/app/stores/cartStore";
+import { CartItemType } from "@/data/data";
 import { useQuery } from "@tanstack/react-query";
 import { ShoppingCartIcon } from "@heroicons/react/24/outline";
 const getProductsByIds = async (ids: string[]) => {
@@ -49,10 +50,19 @@ export default function CartDropdown() {
   });
 
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-  const totalPrice = cartItems.reduce(
-    (sum, item) => sum + (item.priceSnapshot * item.quantity),
-    0
-  );
+  
+    // if item.discountedPrice is greater than 0, use it, otherwise use item.price
+  const totalPrice = cartItems.reduce((sum, item) => {
+    const product = products?.find(p => p._id === item.productId);
+    if (!product) return sum;
+    const priceSnapshot = product.discountedPrice && product.discountedPrice > 0
+      ? product.discountedPrice
+      : product.price;
+    return sum + (priceSnapshot * item.quantity);
+  }
+  , 0);
+
+    
 
   const renderProduct = (item: CartItemType) => (
     <div key={`${item.productId}-${item.size}`} className="flex py-5 last:pb-0">
@@ -91,7 +101,7 @@ export default function CartDropdown() {
               <p className="text-red-500 text-sm mt-1">Out of stock</p>
             )}
           </div>
-          <Prices price={item.priceSnapshot * item.quantity} className="mt-0.5" />
+          <Prices price={item.price * item.quantity} className="mt-0.5" discountedPrice={item.discountedPrice * item.quantity} />
         </div>
         <div className="flex-1 flex items-end justify-between">
           <button

@@ -80,7 +80,7 @@ export interface OrderType{
   paymentMethod?: string;
   paymentStatus?: string;
   promo?: string;
-  items: Product[];
+  items: CartItemType[];
 }
 
 export interface CartItemType {

@@ -53,7 +53,9 @@ const ProductDetailPage = () => {
     addItem({
       productId: product._id,
       name: product.name,
-      priceSnapshot: product.discountedPrice || product.price,
+      price: product.price,
+      discountedPrice: product.discountedPrice,
+      sizeInventory: product.sizeInventory,
       size: sizeSelected,
       quantity: quantitySelected,
       image: product.images[0],
