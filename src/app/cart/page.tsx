@@ -8,7 +8,7 @@ import Image from "next/image";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { set, useForm } from "react-hook-form";
 import { z } from "zod";
 import { useCartStore } from "@/app/stores/cartStore";
 import { useQuery } from "@tanstack/react-query";
@@ -16,16 +16,42 @@ import React from "react";
 
 const schema = z.object({
   name: z.string().min(1, { message: "Name is required" }),
-  email: z.string().email({ message: "Invalid email address" }),
+  email: z.string().email().optional().or(z.literal('')),
+  deliveryArea: z.enum(['insideDhaka', 'outsideDhaka']),
   address: z.string().min(1, { message: "Address is required" }),
   phone: z.string().min(1, { message: "Phone number is required" }),
+  thana: z.string().optional(),
+  district: z.string().optional(),
+}).superRefine((data, ctx) => {
+  if (data.deliveryArea === 'outsideDhaka') {
+    if (!data.thana) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Thana is required",
+        path: ["thana"],
+      });
+    }
+    if (!data.district) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "District is required",
+        path: ["district"],
+      });
+    }
+  }
 });
 
 const CartPage = () => {
-
-  const { register, handleSubmit, formState: { errors } } = useForm({
+  const [Loading, setIsLoading] = React.useState(false);
+  const { register, handleSubmit, formState: { errors, isValid }, watch } = useForm({
     resolver: zodResolver(schema),
+    defaultValues: {
+      deliveryArea: 'insideDhaka',
+    },
+    mode: 'onTouched',
   });
+
+  const deliveryArea = watch('deliveryArea');
 
   // Fetch all products first
   const { data: products, isLoading, isError } = useQuery({
@@ -61,21 +87,35 @@ const CartPage = () => {
   }, [products, validateCart]);
 
   const onSubmit = async (formData: any) => {
+    console.log("Form Data:", formData);
+    const { name, email, address, phone, thana, district } = formData;
+    const user = {
+      name,
+      email: email || undefined,
+      address: `${address}, ${thana || ""}, ${district || ""}`,
+      phone,
+      
+    };
     try {
       const orderDetails = {
-        user: formData,
+        user: user,
+        delivaryCharge: deliveryArea === 'insideDhaka' ? 80 : 120,
+        // total: products price * quantity + delivery charge
+        total: calculateOrderSummary(deliveryArea).total,
         cartItems: cartItems,
       };
-
+      setIsLoading(true);
+      // console.log("Order Details:", orderDetails);
       const response = await fetch("/api/cart", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(orderDetails),
       });
-
+      setIsLoading(false);
       if (!response.ok) throw new Error("Order failed");
       
       toast.success("Order placed successfully!");
+      
       clearCart();
     } catch (error) {
       console.error("Order error:", error);
@@ -102,9 +142,7 @@ const CartPage = () => {
   };
 
   const renderProduct = (item: CartItemType & { price: number; discountedPrice: number; sizeInventory: Array<{ size: string; stock: number }> }) => {
-      const product = products?.find((p: { _id: string }) => p._id === item.productId);
-    // console.log(disconnectedPrice, "discountedPrice")
-    console.log("discountedPrice", item.discountedPrice, "price", item.price)
+    const product = products?.find((p: { _id: string }) => p._id === item.productId);
     return (
       <div key={`${item.productId}-${item.size}`} className="relative flex py-8 sm:py-10 xl:py-12 first:pt-0 last:pb-0">
         <div className="relative h-36 w-24 sm:w-32 flex-shrink-0 overflow-hidden rounded-xl bg-slate-100">
@@ -154,7 +192,7 @@ const CartPage = () => {
             </div>
 
             <div className="hidden flex-1 sm:flex justify-end">
-              <Prices price={item.price??0 * item.quantity} discountedPrice={item.discountedPrice*item.quantity} />
+              <Prices price={item.price ?? 0 * item.quantity} discountedPrice={item.discountedPrice ?? 0 * item.quantity} />
             </div>
           </div>
 
@@ -172,11 +210,8 @@ const CartPage = () => {
     );
   };
 
-  const calculateOrderSummary = () => {
-    // const subtotal = cartItems.reduce((sum, item) => 
-    //   sum + (item.priceSnapshot * item.quantity), 0
-    // );
-    // if discountprice is greater than zero than calculate with discounted price or calculate with the price
+  const calculateOrderSummary = (deliveryArea: 'insideDhaka' | 'outsideDhaka') => {
+    const shipping = deliveryArea === 'insideDhaka' ? 80 : 120;
     const subtotal = cartItems.reduce((sum, item) => {
       const product = products?.find((p) => p._id === item.productId);
       if (product && product.discountedPrice > 0) {
@@ -184,30 +219,24 @@ const CartPage = () => {
       }
       return sum + (item.price * item.quantity);
     }, 0);
-    const shipping = 80;
-    const tax = subtotal * 0.1;
-    const total = subtotal + shipping + tax;
+    const total = subtotal + shipping;
 
-    return { subtotal, shipping, tax, total };
+    return { subtotal, shipping, total };
   };
 
-  const { subtotal, shipping, tax, total } = calculateOrderSummary();
-  const disableCheckout = cartItems.length === 0 || 
-    cartItems.some(item => !item.isValid) ||
-    Object.keys(errors).length > 0;
+  const { subtotal, shipping, total } = calculateOrderSummary(deliveryArea);
+  const disableCheckout = cartItems.length === 0;
 
   if (isLoading) return (
-    // Loading with skeleton or spinner
     <div className="flex items-center justify-center h-screen">
       <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
     </div>
   )
   if (isError) return <div>Error loading products</div>;
-  console.log(products, "products"); 
+
   return (
     <div className="nc-CartPage">
       <main className="container py-16 lg:pb-28 lg:pt-20">
-        {/* ... rest of the JSX remains similar to previous version ... */}
         <div className="flex flex-col lg:flex-row first-letter:first-line:space-y-8 lg:space-y-0 lg:space-x-8">
           <div className="w-full lg:w-[60%] xl:w-[55%] divide-y divide-slate-200 dark:divide-slate-700">
             {cartItems.length > 0 ? (
@@ -216,11 +245,7 @@ const CartPage = () => {
                 if (!product) return null;
                 return renderProduct({
                   ...item,
-                  price: product.price,
-                  discountedPrice: product.discountedPrice ??0,
-                  sizeInventory: product.sizeInventory,
                   image: product.images[0] || "",
-                  name: product.name,
                 });
               })
             ) : (
@@ -247,13 +272,7 @@ const CartPage = () => {
                     <div className="flex justify-between py-4">
                       <span>Shipping estimate</span>
                       <span className="font-semibold text-slate-900 dark:text-slate-200">
-                      ৳{shipping.toFixed(2)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between py-4">
-                      <span>Tax estimate</span>
-                      <span className="font-semibold text-slate-900 dark:text-slate-200">
-                      ৳{tax.toFixed(2)}
+                        ৳{shipping.toFixed(2)}
                       </span>
                     </div>
                     <div className="flex justify-between font-semibold text-slate-900 dark:text-slate-200 text-base pt-4">
@@ -261,15 +280,12 @@ const CartPage = () => {
                       <span> ৳{total.toFixed(2)}</span>
                     </div>
                   </div>
-                  {/* form for details with zod and checkout as submit button */}
+                  
                   <form
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      // handle form submission
-                      handleSubmit(onSubmit)();
-                    }}
+                    onSubmit={handleSubmit(onSubmit)}
                     className="mt-8"
                   >
+                    {/* name */}
                     <div className="mb-4">
                       <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
                         Name
@@ -285,17 +301,17 @@ const CartPage = () => {
                     </div>
                     <div className="mb-4">
                       <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                        Email
+                        Delivery Area
                       </label>
-                      <input
-                        type="email"
-                        {...register("email")}
+                      <select
+                        {...register("deliveryArea")}
                         className="mt-1 block w-full border border-slate-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500"
-                      />
-                      {errors.email && (
-                        <p className="mt-2 text-sm text-red-600">{errors.email.message}</p>
-                      )}
+                      >
+                        <option value="insideDhaka">Inside Dhaka (Delivery: ৳80)</option>
+                        <option value="outsideDhaka">Outside Dhaka (Delivery: ৳120)</option>
+                      </select>
                     </div>
+
                     <div className="mb-4">
                       <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
                         Address
@@ -307,6 +323,52 @@ const CartPage = () => {
                       />
                       {errors.address && (
                         <p className="mt-2 text-sm text-red-600">{errors.address.message}</p>
+                      )}
+                    </div>
+
+                    {deliveryArea === 'outsideDhaka' && (
+                      <>
+                        <div className="mb-4">
+                          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                            Thana
+                          </label>
+                          <input
+                            type="text"
+                            {...register("thana")}
+                            className="mt-1 block w-full border border-slate-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500"
+                          />
+                          {errors.thana && (
+                            <p className="mt-2 text-sm text-red-600">{errors.thana.message}</p>
+                          )}
+                        </div>
+                        <div className="mb-4">
+                          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                            District
+                          </label>
+                          <input
+                            type="text"
+                            {...register("district")}
+                            className="mt-1 block w-full border border-slate-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500"
+                          />
+                          {errors.district && (
+                            <p className="mt-2 text-sm text-red-600">{errors.district.message}</p>
+                          )}
+                        </div>
+                      </>
+                    )}
+
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                        {/* "Email (optional)" */}
+                        {`Email (optional)`}
+                      </label>
+                      <input
+                        type="email"
+                        {...register("email")}
+                        className="mt-1 block w-full border border-slate-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500"
+                      />
+                      {errors.email && (
+                        <p className="mt-2 text-sm text-red-600">{errors.email.message}</p>
                       )}
                     </div>
                     <div className="mb-4">
@@ -322,14 +384,15 @@ const CartPage = () => {
                         <p className="mt-2 text-sm text-red-600">{errors.phone.message}</p>
                       )}
                     </div>
-                    <ButtonPrimary type="submit" className="w-full mt-4">
-                      Place order
+
+                    <ButtonPrimary 
+                      type="submit" 
+                      className={`w-full mt-4 ${disableCheckout ? "bg-red-400" : "bg-primary-600 hover:bg-primary-500"}`}
+                      disabled={disableCheckout}
+                    >
+                      {Loading ? "Placing Order..." : "Place Order"}
                     </ButtonPrimary>
                   </form>
-                  
-                  {/* <ButtonPrimary href="/checkout" className="mt-8 w-full">
-                    Checkout
-                  </ButtonPrimary> */}
                 </div>
               </div>
             </>
