@@ -249,7 +249,7 @@ const ProductDetailPage = () => {
             </h2>
             {product.rating ? (
               <div className="mt-10">
-                <ReviewItem />
+                {/* <ReviewItem /> */}
                 <ButtonSecondary
                   onClick={() => setIsOpenModalViewAllReviews(true)}
                   className="mt-10 border border-slate-300"
@@ -266,10 +266,10 @@ const ProductDetailPage = () => {
         </div>
       </main>
 
-      <ModalViewAllReviews
+      {/* <ModalViewAllReviews
         show={isOpenModalViewAllReviews}
         onCloseModalViewAllReviews={() => setIsOpenModalViewAllReviews(false)}
-      />
+      /> */}
     </div>
   );
 };

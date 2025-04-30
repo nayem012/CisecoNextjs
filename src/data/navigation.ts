@@ -184,6 +184,16 @@ export const NAVIGATION_DEMO_2: NavItemType[] = [
     href: `/collection` as const,
     name: item.name,
   })),
+  // {
+  //   id: ncNanoId(),
+  //   href: "/collection",
+  //   name: "POLO T-Shirts",
+  // },
+  // {
+  //   id: ncNanoId(),
+  //   href: "/comingSoon",
+  //   name: "T-Shirts",
+  // },
  // Flatten the array of arrays
 
   // {

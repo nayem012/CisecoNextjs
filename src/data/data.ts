@@ -57,9 +57,13 @@ export type ProductStatus = "New in" | "Limited Edition" | "Sold Out" | "Offer" 
 export const CATEGORIES = [
   // tshirt, bracelet, perfume
   {
-    name: "T-Shirts",
-    slug: "t-shirts",
+    name: "POLO T-Shirt",
+    slug: "POLO T-Shirt",
   },
+  {
+    name: "T-Shirt",
+    slug: "t-shirt",
+  }
   // {
   //   name: "Bracelets",
   //   slug: "bracelets",

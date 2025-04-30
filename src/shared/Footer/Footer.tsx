@@ -69,7 +69,20 @@ const Footer: React.FC = () => {
 
         {/* Copyright */}
         <div className="mt-16 pt-8 border-t border-neutral-200 dark:border-neutral-800 text-center text-neutral-500 dark:text-neutral-400 text-sm">
-          &copy; {new Date().getFullYear()} Your Company. All rights reserved.
+          &copy; {new Date().getFullYear()} ARTEXO. All rights reserved.
+        </div>
+
+        {/* deveoper */}
+        <div className="mt-2 text-center text-neutral-500 dark:text-neutral-400 text-sm">
+          Developed by{" "}
+          <a
+            href="https://turag.netlify.app"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary-600 dark:text-primary-400 hover:underline"
+          >
+            Turag
+          </a>
         </div>
       </div>
     </footer>
