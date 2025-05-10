@@ -22,6 +22,7 @@ import SectionPromo2 from "@/components/SectionPromo2";
 import ModalViewAllReviews from "./ModalViewAllReviews";
 import { useCartStore } from "@/app/stores/cartStore";
 
+import { siteName, siteDescription, siteUrl } from "@/lib/config";
 const ProductDetailPage = () => {
   const { id } = useParams();
   const [sizeSelected, setSizeSelected] = useState("");
@@ -124,13 +125,49 @@ const ProductDetailPage = () => {
       </div>
     );
   };
+  if (isLoading){
+    return (
+      <div className="container py-20 flex justify-center h-96 w-96">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-6000" />
+      </div>
+    );
+  }
+  if (!product) {
+    return (
+      <div className="container py-20 text-center text-red-500">
+        Product not found
+      </div>
+    );
+  }
+  if (isError) {
+    return (
+      <div className="container py-20 text-center text-red-500">
+        Product not found
+      </div>
+    );
+  }
+  // const ogImage = product.images[0] || "/default-product.jpg";
+  // const ogTitle = `${product.name} | artexobd.com`;
+  // const ogDesc = product.description;
+  // const ogUrl = `https://artexobd.com/product/${product._id}`;
+  // const ogType = "product";
+  // const ogSiteName = "artexobd.com";
+  const ogImage = product.images[0] || "/default-product.jpg";
+  const ogTitle = `${product.name} | ${siteName}`;
+  const ogDesc = product.description || siteDescription;
+  const ogUrl = `${siteUrl}/product/${product._id}`;
+  const ogType = "product";
+  const ogSiteName = siteName;
+
 
   const renderSectionContent = () => {
     if (!product) return null;
     const maxQuantity = product.sizeInventory.find(si => si.size === sizeSelected)?.stock || 0;
 
     return (
+
       <div className="space-y-7 2xl:space-y-8">
+
         <div>
           <h2 className="text-2xl sm:text-3xl font-semibold">{product.name}</h2>
           <div className="flex items-center mt-5 space-x-4 sm:space-x-5">
@@ -185,19 +222,24 @@ const ProductDetailPage = () => {
     );
   };
 
-  if (isLoading) return (
-    <div className="container py-20 flex justify-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-6000" />
-    </div>
-  );
-
-  if (isError || !product) return (
-    <div className="container py-20 text-center text-red-500">
-      Product not found
-    </div>
-  );
 
   return (
+    <>
+    <head>
+      <title>{`${product.name} | Artexobd.com`}</title>
+      <meta name="description" content={product.description} />
+      <meta property="og:title" content={ogTitle} />
+      <meta property="og:description" content={ogDesc} />
+      <meta property="og:image" content={ogImage} />
+      <meta property="og:url" content={ogUrl} />
+      <meta property="og:type" content={ogType} />
+      <meta property="og:site_name" content={ogSiteName} />
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:title" content={ogTitle} />
+      <meta name="twitter:description" content={ogDesc} />
+      <meta name="twitter:image" content={ogImage} />
+      <meta name="twitter:url" content={ogUrl} />
+    </head>
     <div className="nc-ProductDetailPage">
       <main className="container mt-5 lg:mt-11">
         <div className="lg:flex">
@@ -271,6 +313,7 @@ const ProductDetailPage = () => {
         onCloseModalViewAllReviews={() => setIsOpenModalViewAllReviews(false)}
       /> */}
     </div>
+    </>
   );
 };
 

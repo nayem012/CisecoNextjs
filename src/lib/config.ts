@@ -1,2 +1,5 @@
-export const apiURL = "https://admin-panel.artexo.store/api/admin/"
+export const apiURL = "https://admin-panel.artexobd.com/api/admin/"
 // export const apiURL = "http://localhost:3001/api/admin/"
+export const siteName = "ARtexo"
+export const siteDescription = "Shop the latest best polo t‑shirts. 100% cotton, cash‑on‑delivery across BD. Grab yours now!"
+export const siteUrl = "https://artexobd.com"
