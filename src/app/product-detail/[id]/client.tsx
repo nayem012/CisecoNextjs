@@ -216,7 +216,17 @@ const ProductDetailComponent = ({ initialProduct }: { initialProduct: Product })
                 </div>
 
                 <hr className="border-slate-200" />
-                <AccordionInfo data={[{ name: "Description", content: product.description }]} />
+                {/* product.color:string */}
+                <div className="flex items-center text-sm font-medium">
+                    <span>Color:</span>
+                    <span className="text-slate-600 ml-2">{product.color ?? "As the image"}</span>
+                </div>
+
+                <AccordionInfo data={[
+                    { name: "Size chart", content: product.sizeChart ?? "Our default size chart" },
+                    { name: "Description", content: product.description },
+                    
+                    ]} />
                 <div className="hidden xl:block">
                     <Policy />
                 </div>

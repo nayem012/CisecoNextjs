@@ -42,6 +42,10 @@ export interface Product {
   metaDescription: string;
   productTags: string[];
   rating?: IRating;
+  updatedAt?: string;
+  sizeChart?: string;
+  tags?: string[];
+  color?: string;
 }
 export interface ISizeInventory {
   size: string;

@@ -76,7 +76,7 @@ const AccordionInfo: FC<Props> = ({
                   )}
                 </Disclosure.Button>
                 <Disclosure.Panel
-                  className={panelClassName}
+                  className={`${panelClassName} whitespace-pre-line`}
                   as="div"
                   dangerouslySetInnerHTML={{ __html: item.content }}
                 ></Disclosure.Panel>
