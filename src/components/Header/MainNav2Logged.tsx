@@ -8,6 +8,7 @@ import Navigation from "@/shared/Navigation/Navigation";
 import CartDropdown from "./CartDropdown";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 // import { useCart } from "@/hooks/useCart";
 
 export interface MainNav2LoggedProps {}
@@ -98,6 +99,18 @@ const MainNav2Logged: FC<MainNav2LoggedProps> = () => {
             </button>
           )}
           <AvatarDropdown /> */}
+          {/* a magifiying glass icon, click to go /search */}
+          <Link href={"/search"} className="hidden lg:flex w-10 h-10 sm:w-12 sm:h-12 rounded-full text-primary-700 dark:text-primary-300 hover:bg-primary-100 dark:hover:bg-primary-800 focus:outline-none items-center justify-center">
+            {renderMagnifyingGlassIcon()}
+          </Link>
+          {/* for mobile search button */}
+          <Link
+            href={"/search"}
+            className="lg:hidden flex w-10 h-10 sm:w-12 sm:h-12 rounded-full text-primary-700 dark:text-primary-300 hover:bg-primary-100 dark:hover:bg-primary-800 focus:outline-none items-center justify-center"
+            
+          >
+            {renderMagnifyingGlassIcon()}
+          </Link>
           <CartDropdown />
         </div>
       </div>

@@ -19,6 +19,7 @@ import AccordionInfo from "@/components/AccordionInfo";
 import Image from "next/image";
 import Link from "next/link";
 import { UrlObject } from "url";
+import {cloudinaryLoader} from "@/utils/cloudinaryLoader";
 // import { useCart } from "@/hooks/useCart";
 import { useCartStore } from "@/app/stores/cartStore";
 export interface ProductQuickViewProps {
@@ -242,6 +243,7 @@ const ProductQuickView: FC<ProductQuickViewProps> = ({ className = "", product }
                 className="w-full rounded-xl object-cover"
                 alt={name}
                 priority
+                loader={cloudinaryLoader}
               />
             </div>
             {renderStatus()}
@@ -256,6 +258,7 @@ const ProductQuickView: FC<ProductQuickViewProps> = ({ className = "", product }
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   className="w-full rounded-xl object-cover"
                   alt={`${name} - ${index + 2}`}
+                  loader={cloudinaryLoader}
                 />
               </div>
             ))}

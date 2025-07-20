@@ -19,6 +19,15 @@ const HeaderFilterSection: FC<HeaderFilterSectionProps> = ({
   const [isOpen, setIsOpen] = useState(true);
   const [tabActive, setTabActive] = useState("All items");
 
+  // Add missing filter states
+  const [categoriesState, setCategoriesState] = useState<string[]>([]);
+  const [colorsState, setColorsState] = useState<string[]>([]);
+  const [sizesState, setSizesState] = useState<string[]>([]);
+  const [sortOrder, setSortOrder] = useState<string>("");
+  const [isOpenMoreFilter, setisOpenMoreFilter] = useState(false);
+  const [isOnSale, setIsIsOnSale] = useState(false);
+  const [rangePrices, setRangePrices] = useState<number[]>([0, 100]);
+
   return (
     <div className={`flex flex-col relative ${className}`}>
       <Heading>{`What's trending now`}</Heading>
@@ -85,15 +94,15 @@ const HeaderFilterSection: FC<HeaderFilterSectionProps> = ({
 
       <Transition
         show={isOpen}
-        enter="transition-opacity duration-150"
+        enter="transition-opacity duration-200"
         enterFrom="opacity-0"
         enterTo="opacity-100"
         leave="transition-opacity duration-150"
         leaveFrom="opacity-100"
         leaveTo="opacity-0"
       >
-        <div className="w-full border-b border-neutral-200 dark:border-neutral-700 my-8"></div>
         <TabFilters />
+        <div className="w-full border-b border-neutral-200 dark:border-neutral-700 my-8"></div>
       </Transition>
     </div>
   );

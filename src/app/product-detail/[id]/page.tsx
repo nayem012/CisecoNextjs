@@ -70,6 +70,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export const revalidate = 300;
 export default async function ProductDetailPage({ params }: Props) {
   const initialProduct: Product = await getProductById(params.id) as Product;
+
+  // Fire view content event for analytics/ads
+  
+
   return (
     <div>
       <ProductDetailComponent initialProduct={initialProduct} />

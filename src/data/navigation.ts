@@ -179,9 +179,14 @@ const OTHER_PAGE_CHILD: NavItemType[] = [
 ];
 
 export const NAVIGATION_DEMO_2: NavItemType[] = [
+  {
+    id: ncNanoId(),
+    href: "/collection",
+    name: "All Products",
+  },
   ...CATEGORIES.map((item) => ({
     id: ncNanoId(),
-    href: `/collection` as const,
+    href: `/${item.slug}`,
     name: item.name,
   })),
   // {

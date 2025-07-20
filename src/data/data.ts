@@ -67,6 +67,11 @@ export const CATEGORIES = [
   {
     name: "T-Shirt",
     slug: "t-shirt",
+  },
+  {
+    // jersey
+    name: "Jersey",
+    slug: "jersey",
   }
   // {
   //   name: "Bracelets",

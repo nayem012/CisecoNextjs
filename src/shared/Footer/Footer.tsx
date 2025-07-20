@@ -2,6 +2,7 @@ import Logo from "@/shared/Logo/Logo";
 import SocialsList1 from "@/shared/SocialsList1/SocialsList1";
 import { CustomLink } from "@/data/types";
 import React from "react";
+import { siteName } from "@/lib/config";
 
 export interface WidgetFooterMenu {
   id: string;
@@ -69,7 +70,7 @@ const Footer: React.FC = () => {
 
         {/* Copyright */}
         <div className="mt-16 pt-8 border-t border-neutral-200 dark:border-neutral-800 text-center text-neutral-500 dark:text-neutral-400 text-sm">
-          &copy; {new Date().getFullYear()} ARTEXO. All rights reserved.
+          &copy; {new Date().getFullYear()} {siteName}. All rights reserved.
         </div>
 
         {/* deveoper */}

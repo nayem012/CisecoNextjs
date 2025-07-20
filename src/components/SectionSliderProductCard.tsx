@@ -8,6 +8,7 @@ import ProductCard from "./ProductCard";
 import { Product } from "@/data/data";
 import { useQuery } from "@tanstack/react-query";
 import { getProducts } from "@/lib/api/product";
+import Link from "next/link";
 
 export interface SectionSliderProductCardProps {
   className?: string;
@@ -17,6 +18,7 @@ export interface SectionSliderProductCardProps {
   headingClassName?: string;
   subHeading?: string;
   data?: Product[];
+  category?: string;
 }
 
 const SectionSliderProductCard: FC<SectionSliderProductCardProps> = ({
@@ -26,6 +28,7 @@ const SectionSliderProductCard: FC<SectionSliderProductCardProps> = ({
   headingClassName,
   heading,
   subHeading = "Our Exclusive Collection",
+  category = "all",
 }) => {
   const sliderRef = useRef(null);
   const id = useId();
@@ -33,11 +36,12 @@ const SectionSliderProductCard: FC<SectionSliderProductCardProps> = ({
   const [glideOptions, setGlideOptions] = useState<Partial<Glide.Options>>({});
 
   const { data: products = [], isLoading, isError } = useQuery({
-    queryKey: ['products'],
+    queryKey: ["products-slider", category],
     queryFn: async () => {
-      const res = await getProducts(8, 1);
+      const res = await getProducts({ limit: 8, page: 1, category });
       return res.data || [];
     },
+    staleTime: 1000 * 60 * 5, // cache for 5 minutes
   });
 
   useEffect(() => {
@@ -119,7 +123,6 @@ const SectionSliderProductCard: FC<SectionSliderProductCardProps> = ({
         >
           {heading || `New Arrivals`}
         </Heading>
-        
         <div className="glide__track" data-glide-el="track">
           <ul className="glide__slides">
             {products.map((item: Product) => (
@@ -128,6 +131,14 @@ const SectionSliderProductCard: FC<SectionSliderProductCardProps> = ({
               </li>
             ))}
           </ul>
+        </div>
+        <div className="flex justify-center mt-6">
+            <Link
+            href={`/collection?categoryState=${category==='all' ? '' : category}`}
+            className="inline-block px-6 py-2 rounded-lg bg-primary-600 text-white font-semibold shadow-md hover:bg-primary-700 transition-colors text-sm md:text-base w-full max-w-xs text-center"
+            >
+            View All {heading || category}
+            </Link>
         </div>
       </div>
     </div>

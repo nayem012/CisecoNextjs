@@ -21,6 +21,7 @@ import ButtonSecondary from "@/shared/Button/ButtonSecondary";
 import SectionPromo2 from "@/components/SectionPromo2";
 import ModalViewAllReviews from "./ModalViewAllReviews";
 import { useCartStore } from "@/app/stores/cartStore";
+import { cloudinaryLoader } from "@/utils/cloudinaryLoader";
 
 import { siteName, siteDescription, siteUrl } from "@/lib/config";
 const ProductDetailComponent = ({ initialProduct }: { initialProduct: Product }) => {
@@ -47,6 +48,7 @@ const ProductDetailComponent = ({ initialProduct }: { initialProduct: Product })
     });
 
     const notifyAddTocart = () => {
+
         if (!product || !sizeSelected) return;
 
         const selectedSize = product.sizeInventory.find(si => si.size === sizeSelected);
@@ -78,7 +80,7 @@ const ProductDetailComponent = ({ initialProduct }: { initialProduct: Product })
             <div>
                 <div className="flex justify-between font-medium text-sm">
                     <label>
-                        <span>Size: <span className="font-semibold ml-1">{sizeSelected}</span></span>
+                        <span>Size: <span className="font-semibold ml-1">{sizeSelected}</span></span>{sizeSelected ? "" : <span className="text-red-500"> (Please select a size)</span>}
                     </label>
                 </div>
                 <div className="grid grid-cols-5 sm:grid-cols-7 gap-2 mt-3">
@@ -89,12 +91,12 @@ const ProductDetailComponent = ({ initialProduct }: { initialProduct: Product })
                         return (
                             <div
                                 key={sizeInv.size}
-                                className={`relative h-10 sm:h-11 rounded-2xl border flex items-center justify-center 
+                                className={`relative h-10 sm:h-11 hover:bg-primary-100 rounded-2xl border flex items-center justify-center 
                   text-sm sm:text-base uppercase font-semibold select-none overflow-hidden z-0 ${isOutOfStock
                                         ? "text-opacity-20 cursor-not-allowed"
                                         : "cursor-pointer"
                                     } ${isActive
-                                        ? "bg-primary-6000 border-primary-6000 text-white hover:bg-primary-6000"
+                                        ? "bg-primary-100 border-primary-600 text-primary-500 hover:bg-primary-200"
                                         : "border-slate-300 text-slate-900 hover:bg-neutral-50"
                                     }`}
                                 onClick={() => !isOutOfStock && setSizeSelected(sizeInv.size)}
@@ -206,15 +208,17 @@ const ProductDetailComponent = ({ initialProduct }: { initialProduct: Product })
                         </div>
                     </div>
                     <ButtonPrimary
-                        className="flex-1 flex-shrink-0"
+                        className={`flex-1 flex-shrink-0 ${!maxQuantity || !sizeSelected ? "line-through" : ""}`}
                         onClick={notifyAddTocart}
-                        disabled={!sizeSelected || !maxQuantity}
+                        disabled={!maxQuantity || !sizeSelected}
                     >
                         <BagIcon className="hidden sm:inline-block w-5 h-5 mb-0.5" />
                         <span className="ml-3">Add to cart</span>
                     </ButtonPrimary>
-                </div>
+                    {/* error message if size is not selected */}
 
+                </div>
+                
                 <hr className="border-slate-200" />
                 {/* product.color:string */}
                 <div className="flex items-center text-sm font-medium">
@@ -225,8 +229,8 @@ const ProductDetailComponent = ({ initialProduct }: { initialProduct: Product })
                 <AccordionInfo data={[
                     { name: "Size chart", content: product.sizeChart ?? "Our default size chart" },
                     { name: "Description", content: product.description },
-                    
-                    ]} />
+
+                ]} />
                 <div className="hidden xl:block">
                     <Policy />
                 </div>
@@ -245,10 +249,12 @@ const ProductDetailComponent = ({ initialProduct }: { initialProduct: Product })
                                 <div className="aspect-w-16 aspect-h-16 relative">
                                     <Image
                                         fill
+                                        sizes="(min-width: 1024px) 32rem, (min-width: 640px) 20rem, 100vw"
                                         src={product.images[0] || '/default-product.jpg'}
                                         className="w-full rounded-2xl object-cover"
                                         alt={product.name}
                                         priority
+                                        loader={cloudinaryLoader}
                                     />
                                 </div>
                                 {renderStatus()}
@@ -260,9 +266,11 @@ const ProductDetailComponent = ({ initialProduct }: { initialProduct: Product })
                                     <div key={index} className="aspect-w-11 aspect-h-16 relative">
                                         <Image
                                             fill
+                                            sizes="(min-width: 1024px) 32rem, (min-width: 640px) 20rem, 100vw"
                                             src={image}
                                             className="w-full rounded-2xl object-cover"
                                             alt={`${product.name} - ${index + 1}`}
+                                            loader={cloudinaryLoader}
                                         />
                                     </div>
                                 ))}

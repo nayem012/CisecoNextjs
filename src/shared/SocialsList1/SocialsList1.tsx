@@ -1,9 +1,8 @@
 import { SocialType } from "@/shared/SocialsShare/SocialsShare";
 import React, { FC } from "react";
 import facebook from "@/images/socials/facebook.svg";
-import twitter from "@/images/socials/twitter.svg";
-import telegram from "@/images/socials/telegram.svg";
-import youtube from "@/images/socials/youtube.svg";
+import instagram from "@/images/socials/instagram.svg";
+// import instagram from "@/images/socials/instagram.svg";
 import Image from "next/image";
 
 export interface SocialsList1Props {
@@ -11,8 +10,8 @@ export interface SocialsList1Props {
 }
 
 const socials: SocialType[] = [
-  { name: "Facebook", icon: facebook, href: "https://www.facebook.com/share/1A7N4x4fP1/" },
-  
+  { name: "Facebook", icon: facebook, href: "https://www.facebook.com/marysmodesty" },
+  { name: "Instagram", icon: instagram, href: "https://www.instagram.com/marysmodesty/" },
 ];
 
 const SocialsList1: FC<SocialsList1Props> = ({ className = "space-y-3" }) => {
@@ -24,7 +23,7 @@ const SocialsList1: FC<SocialsList1Props> = ({ className = "space-y-3" }) => {
         key={index}
       >
         <div className="flex-shrink-0 w-5 ">
-          <Image sizes="40px" src={item.icon} alt="" />
+          <Image sizes="40px" src={item.icon} alt="" width={24} height={24} />
         </div>
         <span className="hidden lg:block text-sm">{item.name}</span>
       </a>

@@ -19,6 +19,7 @@ import ProductStatusIndicator from "./ProductStatus";
 import { UrlObject } from "url";
 import { useCartStore } from "@/app/stores/cartStore";
 import { useQueryClient } from "@tanstack/react-query";
+import { cloudinaryLoader } from "@/utils/cloudinaryLoader";
 
 export interface ProductCardProps {
   className?: string;
@@ -130,6 +131,7 @@ const ProductCard: FC<ProductCardProps> = ({
               src={images[0]}
               alt={name}
               className="absolute object-cover object-center"
+              loader={cloudinaryLoader}
             />
           )}
         </div>

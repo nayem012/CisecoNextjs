@@ -3,50 +3,36 @@ import React, { FC } from "react";
 import twFocusClass from "@/utils/twFocusClass";
 import Link from "next/link";
 
-const DEMO_PAGINATION: CustomLink[] = [
-  {
-    label: "1",
-    href: "/",
-  },
-  {
-    label: "2",
-    href: "/",
-  },
-  {
-    label: "3",
-    href: "/",
-  },
-  {
-    label: "4",
-    href: "/",
-  },
-];
-
 export interface PaginationProps {
   className?: string;
+  totalPage: number;
+  currentPage: number;
+  onPageChange: (page: number) => void;
 }
 
-const Pagination: FC<PaginationProps> = ({ className = "" }) => {
-  const renderItem = (pag: CustomLink, index: number) => {
-    if (index === 0) {
+const Pagination: FC<PaginationProps> = ({ className = "", totalPage, currentPage, onPageChange }) => {
+  const pages = Array.from({ length: totalPage }, (_, i) => i + 1);
+  const renderItem = (pageNum: number, index: number) => {
+    if (pageNum === currentPage) {
       return (
         <span
           key={index}
-          className={`inline-flex w-11 h-11 items-center justify-center rounded-full bg-primary-6000 text-white ${twFocusClass()}`}
+          className={`inline-flex w-11 h-11 items-center justify-center rounded-full bg-primary-600 text-white ${twFocusClass()}`}
         >
-          {pag.label}
+          {pageNum}
         </span>
       );
     }
     // RETURN UNACTIVE PAGINATION
     return (
-      <Link
+      <button
         key={index}
-        className={`inline-flex w-11 h-11 items-center justify-center rounded-full bg-white hover:bg-neutral-100 border border-neutral-200 text-neutral-6000 dark:text-neutral-400 dark:bg-neutral-900 dark:hover:bg-neutral-800 dark:border-neutral-700 ${twFocusClass()}`}
-        href={pag.href}
+        className={`inline-flex w-11 h-11 items-center justify-center rounded-full bg-white hover:bg-pink-100 border border-pink-200 text-pink-600 dark:text-pink-300 dark:bg-pink-900 dark:hover:bg-pink-800 dark:border-pink-700 ${twFocusClass()}`}
+        onClick={() => onPageChange(pageNum)}
+        aria-current={pageNum === currentPage ? "page" : undefined}
       >
-        {pag.label}
-      </Link>
+        {pageNum}
+      </button>
     );
   };
 
@@ -54,7 +40,7 @@ const Pagination: FC<PaginationProps> = ({ className = "" }) => {
     <nav
       className={`nc-Pagination inline-flex space-x-1 text-base font-medium ${className}`}
     >
-      {DEMO_PAGINATION.map(renderItem)}
+      {pages.map(renderItem)}
     </nav>
   );
 };

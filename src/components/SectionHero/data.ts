@@ -1,8 +1,8 @@
 import Image, { StaticImageData } from "next/image";
 import { Route } from "@/routers/types";
-import imageRightPng from "@/images/hero-right.png";
-import imageRightPng2 from "@/images/hero-right-2.png";
-import imageRightPng3 from "@/images/hero-right-3.png";
+import imageRightPng from "@/images/hero1.png";
+import imageRightPng2 from "@/images/hero2.png";
+import imageRightPng3 from "@/images/hero3.png";
 
 interface Hero2DataType {
   image: StaticImageData | string;
@@ -13,24 +13,24 @@ interface Hero2DataType {
 }
 export const HERO2_DEMO_DATA: Hero2DataType[] = [
   {
+    image: imageRightPng,
+    heading: "Jersey Shop",
+    subHeading: "Score big with authentic jerseys for every fan! ⚽️🏀",
+    btnText: "Shop Jerseys 🏆",
+    btnLink: "/collection",
+  },
+  {
     image: imageRightPng2,
-    heading: "Artexo",
-    subHeading: "Discover exclusive designs crafted with passion ❤️",
-    btnText: "Shop Now 🛒",
+    heading: "Custom Team Kits",
+    subHeading: "Personalize your kit and play like a pro! �️",
+    btnText: "Customize Now ✏️",
     btnLink: "/collection",
   },
   {
     image: imageRightPng3,
-    heading: "Artexo",
-    subHeading: "Stand out with unique styles from the heart of fashion 🔥",
-    btnText: "Explore Collection 🔍",
-    btnLink: "/collection",
-  },
-  {
-    image: imageRightPng,
-    heading: "Artexo",
-    subHeading: "Elevate your wardrobe with our latest trends 😍",
-    btnText: "Get Yours Today 🎉",
+    heading: "Artexo Exclusive",
+    subHeading: "Limited edition jerseys only at Artexo! ⭐️",
+    btnText: "See Exclusives 👕",
     btnLink: "/collection",
   },
 ];

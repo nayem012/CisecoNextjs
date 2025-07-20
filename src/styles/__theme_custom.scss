@@ -140,7 +140,7 @@
 }
 //
 button.gm-control-active.gm-fullscreen-control {
-  @apply rounded-xl #{!important};
+  @apply rounded-xl ;
 }
 
 //
@@ -152,10 +152,10 @@ button.gm-control-active.gm-fullscreen-control {
 /* 
  */
 .nc-shadow-lg {
-  box-shadow: 2px 8px 40px rgba(0, 0, 0, 0.08);
+  box-shadow: 2px 8px 40px rgba(244, 114, 182, 0.18); // pink shadow
 }
 .hover\:nc-shadow-lg:hover {
-  box-shadow: 2px 8px 40px rgba(0, 0, 0, 0.08);
+  box-shadow: 2px 8px 40px rgba(244, 114, 182, 0.28); // pink shadow on hover
 }
 
 .nc-shadow-sketch {

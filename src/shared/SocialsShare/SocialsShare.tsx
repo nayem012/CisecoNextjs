@@ -12,10 +12,10 @@ export interface SocialType {
 }
 
 const socials: SocialType[] = [
-  { name: "Facebook", icon: "lab la-facebook-f", href: "#" },
-  { name: "Twitter", icon: "lab la-twitter", href: "#" },
-  { name: "Linkedin", icon: "lab la-linkedin-in", href: "#" },
-  { name: "Instagram", icon: "lab la-instagram", href: "#" },
+  { name: "Facebook", icon: "lab la-facebook-f", href: "https://facebook.com/marysmodesty" },
+  { name: "Twitter", icon: "lab la-twitter", href: "https://twitter.com/marysmodesty" },
+  { name: "Linkedin", icon: "lab la-linkedin-in", href: "https://linkedin.com/in/marysmodesty" },
+  { name: "Instagram", icon: "lab la-instagram", href: "https://instagram.com/marysmodesty" },
 ];
 
 const SocialsShare: FC<SocialsShareProps> = ({
